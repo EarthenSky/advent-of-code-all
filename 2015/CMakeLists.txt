@@ -11,6 +11,8 @@ set(CMAKE_BUILD_TYPE Debug)
 add_executable(day1 day1.c)
 
 add_executable(day2 day2.c)
-link_libraries(day2 m)
+# target_link_libraries(day2 m) # only for unix
+
+add_executable(day3 day3.c)
 
 # ------------------------------------------------ #
