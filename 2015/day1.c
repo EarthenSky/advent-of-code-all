@@ -21,6 +21,7 @@ void part1() {
     }
 
     printf("floor_number: %lld\n", floor_number);
+    free(file_contents);
 }
 
 void part2() {
@@ -40,4 +41,5 @@ void part2() {
     }
 
     printf("first_index_of_basement: %llu\n", first_index_of_basement);
+    free(file_contents);
 }
