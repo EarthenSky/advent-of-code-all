@@ -106,7 +106,6 @@ void part1(const char *file_contents, size_t file_size) {
     printf("num_nice_words: %llu\n", num_nice_words);
 }
 
-
 void part2(const char *file_contents, size_t file_size) {
     printf("\npart2:\n");
     
