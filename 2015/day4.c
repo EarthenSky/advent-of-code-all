@@ -11,7 +11,7 @@
 void part1();
 void part2();
 
-// cmake --build build; ./build/Debug/day3.exe
+// cmake --build build; ./build/Debug/day4.exe
 int main() {
     const char *file_contents = "yzbqklnj";
     size_t file_size = strlen(file_contents);
