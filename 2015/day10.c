@@ -66,8 +66,6 @@ void part1(const char *file_contents, size_t file_size) {
     }
 
     printf("len of running_word: %llu\n", strlen(running_word));
-
-    // printf("smallest_distance: %u\n", smallest_distance);
 }
 
 void part2(const char *file_contents, size_t file_size) {
@@ -87,6 +85,8 @@ void part2(const char *file_contents, size_t file_size) {
         // Briefly looking through a broken version of the string for 40, there hundreds of duplicates of strings as
         // large as "1123113213221121113122113121113222". And 50 for strings as large as
         // "122113111231133221121321132122311211131122211213211321222113222122211211232221121113122113121113222123211".
+
+        // oh wow, this is a really cool problem b/c there are cycles that always repeat!!
 
         look_and_say(running_word, target_word);
 
