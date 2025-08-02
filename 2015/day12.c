@@ -34,7 +34,7 @@ struct JSON_Int {
 };
 struct JSON_String {
     enum JSON_Kind tag;
-    // TODO: actually store the string!
+    char* string;
 };
 struct JSON_List {
     enum JSON_Kind tag;
@@ -180,12 +180,13 @@ union JSON_Item *deserialize_json(const char *json_string) {
                     break;
                 }
                 case '"': {
-                    char string_buffer[128 + 1];
-                    memset(string_buffer, 0, 128+1);
+                    const size_t MAX_STRING_BUFFER_SIZE = 128 + 1;
+                    char *string_buffer = malloc(MAX_STRING_BUFFER_SIZE * sizeof(char));
 
                     // TODO: enable parsing strings that contain spaces & quotes & stuff!
                     int num_characters_scanned;
                     int result = sscanf(json_string+json_i, "%128[^\"]\"%n", string_buffer, &num_characters_scanned);
+                    string_buffer[num_characters_scanned-1] = '\0';
                     if (result == -1) {
                         printf("ERROR (2): failed to scan integer\n");
                         exit(1);
@@ -196,10 +197,10 @@ union JSON_Item *deserialize_json(const char *json_string) {
                         exit(1);
                     }
                     json_i += num_characters_scanned;
-
+                    
                     union JSON_Item *item = malloc(sizeof(struct JSON_String));
                     item->tag = STRING;
-                    // TODO: actually store the string
+                    item->json_string.string = string_buffer;
 
                     if (state == EXPECTING_JSON_ITEM) {
                         return item;
@@ -434,6 +435,41 @@ int64_t count_integer_leaves(union JSON_Item *json_item) {
     }
 }
 
+int64_t count_non_red_integer_leaves(union JSON_Item *json_item) {
+    switch (json_item->tag) {
+        case INT:
+            return json_item->json_int.value;
+        case STRING:
+            return 0;
+        case LIST: {
+            int64_t sum = 0;
+            for (size_t i = 0; i < json_item->json_list.number_of_items; i++) {
+                sum += count_non_red_integer_leaves(json_item->json_list.items[i]);
+            }
+            return sum;
+        }
+        case OBJECT: {
+            for (size_t i = 0; i < json_item->json_object.number_of_items; i++) {
+                if (
+                    json_item->json_object.items[i]->tag == STRING
+                    && strcmp(json_item->json_object.items[i]->json_string.string, "red") == 0
+                )
+                    return 0;
+            }
+            
+            // return the sum now
+            int64_t sum = 0;
+            for (size_t i = 0; i < json_item->json_object.number_of_items; i++) {
+                sum += count_non_red_integer_leaves(json_item->json_object.items[i]);
+            }
+            return sum;
+        }
+        default:
+            printf("unreachable\n");
+            exit(2);
+    }
+}
+
 void part1(const char *file_contents, size_t file_size) {
     printf("part1:\n");
 
@@ -452,4 +488,16 @@ void part1(const char *file_contents, size_t file_size) {
 
 void part2(const char *file_contents, size_t file_size) {
     printf("\npart2:\n");
+
+    // make copy for strtok to mangle (null terminators)
+    char *file_contents_copy = (char *) malloc(file_size+1);
+    memcpy(file_contents_copy, file_contents, file_size+1);
+    for (char *token = strtok(file_contents_copy, "\n"); token != NULL; token = strtok(NULL, "\n")) {
+        // NOTE: there's only a single token containing the entire json object. No spaces.
+        union JSON_Item *json = deserialize_json(token);
+
+        printf("sum_of_all_non_red_numbers: %lld\n", count_non_red_integer_leaves(json));
+        free_json(json);
+    }
+    free(file_contents_copy);
 }
