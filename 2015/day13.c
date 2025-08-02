@@ -116,7 +116,6 @@ void part1(const char *file_contents, size_t file_size) {
 void part2(const char *file_contents, size_t file_size) {
     printf("\npart2:\n");
 
-    
     // store each person by the first letter in their name
     int64_t happiness_matrix[27][27];
     memset(happiness_matrix, 0, 27 * 27 * sizeof(int64_t));
@@ -148,6 +147,7 @@ void part2(const char *file_contents, size_t file_size) {
     }
     free(file_contents_copy);
 
+    // HERE:
     // easy tiny fix, woo!
     name_exists["Zazzles"[0] - 'A'] = true;
 
