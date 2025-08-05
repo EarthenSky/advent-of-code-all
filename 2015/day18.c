@@ -57,18 +57,20 @@ void both_parts(const char *file_contents, size_t file_size) {
     bool led_matrix[100*100];
     bool buffer[100*100];
 
-    // make copy for strtok to mangle (null terminators)
-    char *file_contents_copy = (char *) malloc(file_size+1);
-    memcpy(file_contents_copy, file_contents, file_size+1);
-    size_t y = 0;
-    for (char *token = strtok(file_contents_copy, "\n"); token != NULL; token = strtok(NULL, "\n")) {
-        size_t token_len = strlen(token);
-        for (size_t x = 0; x < token_len; x++) {
-            led_matrix[y * 100 + x] = (token[x] == '#');
+    {
+        // make copy for strtok to mangle (null terminators)
+        char *file_contents_copy = (char *) malloc(file_size+1);
+        memcpy(file_contents_copy, file_contents, file_size+1);
+        size_t y = 0;
+        for (char *token = strtok(file_contents_copy, "\n"); token != NULL; token = strtok(NULL, "\n")) {
+            size_t token_len = strlen(token);
+            for (size_t x = 0; x < token_len; x++) {
+                led_matrix[y * 100 + x] = (token[x] == '#');
+            }
+            y += 1;
         }
-        y += 1;
+        free(file_contents_copy);
     }
-    free(file_contents_copy);
 
     // perform animation
     bool *next_led_matrix = buffer;
@@ -100,4 +102,60 @@ void both_parts(const char *file_contents, size_t file_size) {
     printf("num_lights_on: %llu\n", num_lights_on);
 
     printf("\npart2:\n");
+    {
+        // make copy for strtok to mangle (null terminators)
+        char *file_contents_copy = (char *) malloc(file_size+1);
+        memcpy(file_contents_copy, file_contents, file_size+1);
+        size_t y = 0;
+        for (char *token = strtok(file_contents_copy, "\n"); token != NULL; token = strtok(NULL, "\n")) {
+            size_t token_len = strlen(token);
+            for (size_t x = 0; x < token_len; x++) {
+                led_matrix[y * 100 + x] = (token[x] == '#');
+            }
+            y += 1;
+        }
+        free(file_contents_copy);
+    }
+
+    next_led_matrix = buffer;
+    last_led_matrix = led_matrix;
+
+    // initial input must also have all 4 corners stuck on!
+    last_led_matrix[0] = true;
+    last_led_matrix[99] = true;
+    last_led_matrix[99 * 100] = true;
+    last_led_matrix[99 * 100 + 99] = true;
+
+    // perform animation
+    for (size_t step_i = 0; step_i < 100; step_i++) {
+        for (size_t led_y = 0; led_y < 100; led_y++) {
+            for (size_t led_x = 0; led_x < 100; led_x++) {
+                size_t num_lights = num_adjacent_active_lights(last_led_matrix, led_x, led_y);
+                if (last_led_matrix[led_y * 100 + led_x]) {
+                    next_led_matrix[led_y * 100 + led_x] = (num_lights == 2 || num_lights == 3);
+                } else {
+                    next_led_matrix[led_y * 100 + led_x] = (num_lights == 3);
+                }
+            }
+        }
+
+        // the 4 corners are stuck on!
+        next_led_matrix[0] = true;
+        next_led_matrix[99] = true;
+        next_led_matrix[99 * 100] = true;
+        next_led_matrix[99 * 100 + 99] = true;
+
+        // swap buffers
+        bool *tmp = next_led_matrix;
+        next_led_matrix = last_led_matrix;
+        last_led_matrix = tmp;
+    }
+
+    num_lights_on = 0;
+    for (size_t yi = 0; yi < 100; yi++) {
+        for (size_t xi = 0; xi < 100; xi++) {
+            num_lights_on += (size_t) last_led_matrix[yi * 100 + xi];
+        }
+    }
+    printf("num_lights_on: %llu\n", num_lights_on);
 }
