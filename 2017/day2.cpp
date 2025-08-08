@@ -24,11 +24,34 @@ void part1(const Matrix<size_t, 2>& spreadsheet) {
         another_checksum += (max_item - min_item);
     }
 
-    std::cout << std::format("another_checksum: {}", another_checksum) << std::endl;
+    std::cout << std::format("(part1) another_checksum: {}", another_checksum) << std::endl;
 }
 
-void part2(const std::basic_string<char>& line) {
+void part2(const Matrix<size_t, 2>& spreadsheet) {
+    size_t another_checksum = 0;
 
+    size_t height = spreadsheet.size()[0];
+    size_t width = spreadsheet.size()[1];
+    for (size_t yi = 0; yi < height; yi++) {
+        auto find_divisor_pair = [&](){
+            for (size_t ai = 0; ai < width; ai++) {
+                size_t a = spreadsheet.get_const(yi, ai);
+                for (size_t bi = 0; bi < width; bi++) {
+                    if (ai == bi)
+                        continue;
+
+                    size_t b = spreadsheet.get_const(yi, bi);
+                    if (a % b == 0)
+                        // a cute early exit via lambdas!
+                        return a / b;
+                }
+            }
+            throw "row data didn't contain a pair of integers where one perfectly divides the other";
+        };
+        another_checksum += find_divisor_pair();
+    }
+
+    std::cout << std::format("(part2) another_checksum: {}", another_checksum) << std::endl;
 }
 
 void populate_spreadsheet(Matrix<size_t, 2>& spreadsheet, const std::basic_string<char>& file_contents) {
@@ -67,7 +90,7 @@ int main() {
     std::cout << std::format("14,15 => {}", spreadsheet.get(14, 15)) << std::endl;
 
     part1(spreadsheet);
-    //part2(line);
+    part2(spreadsheet);
 
     return 0;
 }
