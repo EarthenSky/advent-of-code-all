@@ -46,7 +46,7 @@ void part2(const Matrix<size_t, 2>& spreadsheet) {
                         return a / b;
                 }
             }
-            throw "row data didn't contain a pair of integers where one perfectly divides the other";
+            throw std::runtime_error("row data didn't contain a pair of integers where one perfectly divides the other");
         };
         another_checksum += find_divisor_pair();
     }
@@ -74,7 +74,7 @@ int main() {
     input_file.seekg(0, std::ios::end);
     size_t file_size = input_file.tellg();
     if (file_size >= 4 * 1024 * 1024)
-        throw "file too large";
+        throw std::runtime_error("file too large");
     std::basic_string<char> file_contents(file_size, '\0');
 
     input_file.seekg(0, std::ios::beg);

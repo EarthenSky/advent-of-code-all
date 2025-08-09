@@ -43,7 +43,7 @@ public:
         std::cout << std::format("size of dimensions = {}", dimensions.size()) << std::endl;
         for (size_t d : dimensions) {
             if (d == 0)
-                throw "all dimensions must be non-zero";
+                throw std::runtime_error("all dimensions must be non-zero");
         }
     }
     

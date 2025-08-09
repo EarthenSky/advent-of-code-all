@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <iostream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class InputFile {
@@ -15,6 +16,12 @@ public:
 
     std::vector<int64_t> parse_day5() const;
     std::vector<uint8_t> parse_day6() const;
+
+    void parse_day7(
+        std::unordered_map<std::string, std::vector<std::string>>&,
+        std::unordered_map<std::string, std::string>&,
+        std::unordered_map<std::string, size_t>&
+    ) const;
 };
 
 #endif

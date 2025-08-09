@@ -15,7 +15,7 @@ void part1(const std::basic_string<char>& line) {
         
         // sanity check
         if (!isdigit(c))
-            throw std::format("char at index {} was not digit", i);
+            throw std::runtime_error(std::format("char at index {} was not digit", i));
 
         if (c == c_next) {
             sum_of_equal_digits += static_cast<size_t>(c - '0');

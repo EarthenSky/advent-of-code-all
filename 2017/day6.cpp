@@ -36,7 +36,7 @@ public:
 
         // add initial state
         std::array<uint8_t, 16> state;
-        std::copy(int_list.begin(), int_list.end(), state.begin());
+        std::ranges::copy(int_list.begin(), int_list.end(), state.begin());
         history.push_back(state);
 
         size_t redist_i;
@@ -45,7 +45,7 @@ public:
             this->redistribution_cycle(state);
 
             // linear search (boo)
-            found_duplicate = std::find(history.begin(), history.end(), state) != history.end();
+            found_duplicate = std::ranges::find(history, state) != history.end();
             history.push_back(state);
         }
 
@@ -66,9 +66,9 @@ public:
             this->redistribution_cycle(state);
 
             // linear search (boo)
-            found_duplicate = std::find(history.begin(), history.end(), state) != history.end();
+            found_duplicate = std::ranges::find(history, state) != history.end();
             if (found_duplicate) {
-                size_t target_i = std::find(history.begin(), history.end(), state) - history.begin();
+                size_t target_i = std::ranges::find(history, state) - history.begin();
                 std::cout << std::format("loop_size: {}", (redist_i+1) - target_i) << std::endl;
             }
             history.push_back(state);
