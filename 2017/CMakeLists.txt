@@ -18,7 +18,7 @@ add_executable(day2 day2.cpp)
 # target_link_libraries(day2 m) # only for unix?
 add_executable(day3 day3.cpp)
 add_executable(day4 day4.cpp)
-#add_executable(day5 day5.cpp)
+add_executable(day5 day5.cpp file_input.cpp)
 #add_executable(day6 day6.cpp)
 #add_executable(day7 day7.cpp)
 #add_executable(day8 day8.cpp)
