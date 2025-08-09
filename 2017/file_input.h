@@ -14,6 +14,7 @@ public:
         : file_path(std::move(file_path)) {}
 
     std::vector<int64_t> parse_day5() const;
+    std::vector<uint8_t> parse_day6() const;
 };
 
 #endif
