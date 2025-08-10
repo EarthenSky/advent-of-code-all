@@ -7,6 +7,19 @@
 #include <unordered_map>
 #include <vector>
 
+struct Day8Instruction {
+    std::string target_reg;
+    int64_t offset;
+    std::string cond_reg;
+    std::string cond;
+    int64_t cond_val;
+};
+
+struct Day8Data {
+    std::unordered_map<std::string, int64_t> register_vals;
+    std::vector<Day8Instruction> instruction_list;
+};
+
 class InputFile {
     std::filesystem::path file_path;
 
@@ -22,6 +35,8 @@ public:
         std::unordered_map<std::string, std::string>&,
         std::unordered_map<std::string, size_t>&
     ) const;
+
+    Day8Data parse_day8() const;
 };
 
 #endif
