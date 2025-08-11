@@ -5,6 +5,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_BUILD_TYPE Debug)
 
+if (!MSVC)
+    add_compile_options(-Wall)
+endif()
+
 #if (MSVC)
 #    set(CMAKE_C_FLAGS_RELEASE "/O2 /Zi /DNDEBUG")
 #    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/DEBUG /PROFILE")
@@ -23,6 +27,7 @@ add_executable(day6 day6.cpp file_input.cpp)
 add_executable(day7 day7.cpp file_input.cpp)
 add_executable(day8 day8.cpp file_input.cpp)
 add_executable(day9 day9.cpp file_input.cpp)
+add_executable(day10 day10.cpp file_input.cpp)
 
 
 # ------------------------------------------------ #
