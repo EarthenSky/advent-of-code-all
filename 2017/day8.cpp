@@ -5,7 +5,7 @@
 #include "abstract_solution.h"
 #include "file_input.h"
 
-class Day8Solution : Solution<Day8Data> {
+class Day8Solution : ISolution<Day8Data> {
     friend int main();
 
     void part1(const Day8Data& data) const {

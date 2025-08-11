@@ -39,4 +39,16 @@ public:
     Day8Data parse_day8() const;
 };
 
+template <typename T>
+class IFileParser {
+protected:
+    std::filesystem::path file_path;
+
+public:
+    IFileParser(std::filesystem::path&& file_path)
+        : file_path(std::move(file_path)) {}
+
+    virtual T parse() const = 0;
+};
+
 #endif

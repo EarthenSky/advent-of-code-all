@@ -9,7 +9,7 @@ struct Data {
     std::unordered_map<std::string, size_t> weight;
 };
 
-class Day7Solution : Solution<Data> {
+class Day7Solution : ISolution<Data> {
     friend int main();
 
     void part1(const Data& data) const {
