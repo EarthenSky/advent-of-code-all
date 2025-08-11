@@ -85,10 +85,11 @@ void InputFile::parse_day7(
 Day8Data InputFile::parse_day8() const {
     Day8Data data;
 
+    std::regex pattern(R"(([a-z]+) (inc|dec) (\-?[0-9]+) if ([a-z]+) (>|<|==|!=|>=|<=) (\-?[0-9]+))");
+
     std::ifstream input_file(this->file_path);
     std::string line;
     while (std::getline(input_file, line)) {
-        std::regex pattern(R"(([a-z]+) (inc|dec) (\-?[0-9]+) if ([a-z]+) (>|<|==|!=|>=|<=) (\-?[0-9]+))");
         std::smatch match;
         if (std::regex_match(line, match, pattern)) {
             data.instruction_list.push_back(Day8Instruction{
