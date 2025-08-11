@@ -28,6 +28,8 @@ add_executable(day7 day7.cpp file_input.cpp)
 add_executable(day8 day8.cpp file_input.cpp)
 add_executable(day9 day9.cpp file_input.cpp)
 add_executable(day10 day10.cpp file_input.cpp)
+add_executable(day11 day11.cpp file_input.cpp)
+add_executable(day12 day12.cpp file_input.cpp)
 
 
 # ------------------------------------------------ #
