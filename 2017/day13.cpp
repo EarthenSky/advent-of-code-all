@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <format>
 #include <fstream>
-#include <format>
 #include <numeric>
 #include <ranges>
 #include <unordered_set>
@@ -44,12 +43,8 @@ public:
         size_t total_severity = 0;
 
         // assume layers is sorted in order of layers
-        // size_t ps = 0;
-        // size_t x_pos = 0;
         for (auto [layer, range] : layers) {
-            // 204956
-            // 69796
-            if ((layer+69796) % (2 * range - 2) == 0) {
+            if (layer % (2 * range - 2) == 0) {
                 std::cout << layer << ", " << (range) << std::endl;
                 total_severity += layer * range;
             }

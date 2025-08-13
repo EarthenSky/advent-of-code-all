@@ -27,9 +27,14 @@ add_executable(day6 day6.cpp file_input.cpp)
 add_executable(day7 day7.cpp file_input.cpp)
 add_executable(day8 day8.cpp file_input.cpp)
 add_executable(day9 day9.cpp file_input.cpp)
-add_executable(day10 day10.cpp file_input.cpp)
+add_executable(day10
+    day10.cpp day10_solution.cpp file_input.cpp
+)
 add_executable(day11 day11.cpp file_input.cpp)
 add_executable(day12 day12.cpp file_input.cpp)
 add_executable(day13 day13.cpp file_input.cpp)
+add_executable(day14
+    day14.cpp day10_solution.cpp file_input.cpp
+)
 
 # ------------------------------------------------ #

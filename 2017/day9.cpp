@@ -68,7 +68,6 @@ class Day9Solution : ISolution<std::string> {
         }
     }
 
-
     size_t count_garbage(const std::string& line, size_t& i) const {
         if (i+1 >= line.size())
             throw std::runtime_error("did not expect parsing to START on the last char (or later!)");
