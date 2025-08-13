@@ -6,8 +6,19 @@
 #include <functional>
 #include <numeric>
 #include <string>
+#include <unordered_set>
 
 #include "file_input.h"
+
+struct ArrayHash {
+    size_t operator()(const std::array<uint8_t, 16>& array) const noexcept {
+        size_t tmp_hash = 0;
+        for (size_t i = 0; i < array.size(); i++) {
+            tmp_hash = (103 * tmp_hash) ^ std::hash<uint8_t>{}(array[i]);
+        }
+        return tmp_hash;
+    }
+};
 
 class Solution {
 public:
@@ -32,46 +43,45 @@ public:
         // size_t sum = std::accumulate(int_list.begin(), int_list.end(), 0, std::plus<>());
         // fits in u8!
 
-        std::vector<std::array<uint8_t, 16>> history;
+        std::unordered_set<std::array<uint8_t, 16>, ArrayHash> history;
 
         // add initial state
         std::array<uint8_t, 16> state;
         std::ranges::copy(int_list.begin(), int_list.end(), state.begin());
-        history.push_back(state);
+        history.insert(state);
 
         size_t redist_i;
         bool found_duplicate = false;
         for (redist_i = 0; found_duplicate == false; redist_i++) {
             this->redistribution_cycle(state);
 
-            // linear search (boo)
-            found_duplicate = std::ranges::find(history, state) != history.end();
-            history.push_back(state);
+            // hash lookup; woo!
+            found_duplicate = history.contains(state);
+            history.insert(state);
         }
 
         std::cout << std::format("redist_i: {}", redist_i) << std::endl;
-
     }
 
     void part2(const std::vector<uint8_t>& int_list) const {
-        std::vector<std::array<uint8_t, 16>> history;
+        std::unordered_map<std::array<uint8_t, 16>, size_t, ArrayHash> history;
 
         // add initial state
         std::array<uint8_t, 16> state;
         std::copy(int_list.begin(), int_list.end(), state.begin());
-        history.push_back(state);
+        history.insert(std::make_pair(state, 0));
 
         bool found_duplicate = false;
         for (size_t redist_i = 0; found_duplicate == false; redist_i++) {
             this->redistribution_cycle(state);
 
             // linear search (boo)
-            found_duplicate = std::ranges::find(history, state) != history.end();
+            found_duplicate = history.contains(state);
             if (found_duplicate) {
-                size_t target_i = std::ranges::find(history, state) - history.begin();
+                size_t target_i = history[state];
                 std::cout << std::format("loop_size: {}", (redist_i+1) - target_i) << std::endl;
             }
-            history.push_back(state);
+            history.insert(std::make_pair(state, redist_i));
         }
 
     }
