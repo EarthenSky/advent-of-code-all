@@ -45,7 +45,6 @@ public:
         // assume layers is sorted in order of layers
         for (auto [layer, range] : layers) {
             if (layer % (2 * range - 2) == 0) {
-                std::cout << layer << ", " << (range) << std::endl;
                 total_severity += layer * range;
             }
         }
@@ -74,7 +73,7 @@ public:
                 // (x + layer1) % 11 != 0
                 // =>
                 // x % 33 != { (-layer0), (-layer1)+11*i}
-                auto filter_view = std::ranges::filter_view(offsets, [current_range, offset](size_t item) {
+                auto filter_view = std::views::filter(offsets, [current_range, offset](size_t item) {
                     return (item % current_range) != (
                         (current_range - offset) % current_range
                     );
@@ -89,7 +88,7 @@ public:
                     }
                 }
                 size_t old_factor = combined_range / std::gcd(combined_range, current_range);
-                auto filter_view = std::ranges::filter_view(new_offsets, [current_range, offset](size_t item) {
+                auto filter_view = std::views::filter(new_offsets, [current_range, offset](size_t item) {
                     return (item % current_range) != (
                         (current_range - offset) % current_range
                     );
