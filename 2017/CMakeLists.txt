@@ -37,5 +37,6 @@ add_executable(day14
     day14.cpp day10_solution.cpp file_input.cpp
 )
 add_executable(day15 day15.cpp file_input.cpp)
+add_executable(day16 day16.cpp)
 
 # ------------------------------------------------ #
