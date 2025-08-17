@@ -3,7 +3,7 @@
 #include <format>
 #include <functional>
 #include <ranges>
-#include <cmath>
+//#include <cmath>
 
 #include "abstract_solution.h"
 #include "file_input.h"
@@ -71,16 +71,6 @@ public:
         std::cout << std::endl;
 
         return dancers;
-    }
-
-    /// @brief update dancers using the swizzle from abcdef... to $dancers_after
-    // TODO: will this be returned as a temporary?
-    std::vector<char> apply_dance_swizzle(const std::vector<char>& dancers, const std::vector<char>& dancers_after) const {
-        std::vector<char> new_dancers;
-        for (char c : dancers_after) {
-            new_dancers.push_back(dancers[c - 'a']);
-        }
-        return new_dancers;
     }
 
     void part2(const std::vector<std::string>& moves, const std::vector<char>& dancers_after_1_time) {
