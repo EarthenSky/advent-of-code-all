@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <fstream>
+#include <list>
 //#include <format>
 //#include <functional>
 //#include <ranges>
@@ -42,7 +43,29 @@ public:
     }
 
     void part2(const size_t& offset) {
+        const size_t FIFTY_MILLION = 50 * 1000 * 1000;
 
+        size_t item_after_0 = 0;
+        size_t current_pos = 0;
+        for (size_t i = 0; i < FIFTY_MILLION; i++) {
+            size_t buffer_size = i + 1;
+            const size_t NUM_STEPS = 20;
+            if ((buffer_size - current_pos) > (NUM_STEPS+1) * offset) {
+                current_pos = current_pos + NUM_STEPS * offset + NUM_STEPS;
+                i += NUM_STEPS-1;
+                buffer_size = i + 1;
+            } else {
+                current_pos = (current_pos + offset) % buffer_size;
+                if (current_pos == 0) {
+                    item_after_0 = buffer_size;
+                }
+                current_pos += 1;
+            }
+
+        }
+
+        // 0 will always be at the beginning!
+        std::cout << "(part2) item_after_0: " << item_after_0 << std::endl;
     }
 };
 
