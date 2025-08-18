@@ -35,11 +35,12 @@ enum Direction {
 
 class Day19Solution {
 public:
-    void part1(const string_matrix& matrix) const {
+    void both_parts(const string_matrix& matrix) const {
         size_t starting_x = std::find(matrix[0].begin(), matrix[0].end(), '|') - matrix[0].begin();
         std::cout << "START 2" << std::endl;
 
         std::vector<char> letters_observed;
+        size_t num_steps = 1;
 
         Direction direction = SOUTH;
         size_t x = starting_x;
@@ -48,10 +49,9 @@ public:
             std::vector<Direction> valid_directions;
 
             if (std::isalpha(matrix[y][x])) {
-                //std::cout << "\t" << matrix[y][x] << std::endl;
                 letters_observed.push_back(matrix[y][x]);
 
-                // NOTE: the path must end on a letter or a plus
+                // NOTE: we know the path ends on a letter
                 size_t num_possible_directions = (
                     (matrix[y][x-1] != ' ')
                     + (matrix[y+1][x] != ' ')
@@ -60,6 +60,8 @@ public:
                 );
                 if (num_possible_directions == 1)
                     break;
+                else if (num_possible_directions != 2)
+                    throw std::runtime_error("expected only 1 possible path to go!");
             }
 
             if (matrix[y][x] == '+') {
@@ -70,12 +72,10 @@ public:
                     + (matrix[y-1][x] != ' ')
                 );
 
-                //std::cout << "dirs: " << num_possible_directions << std::endl;
-                if (num_possible_directions == 1) {
+                if (num_possible_directions == 1)
                     break;
-                } else if (num_possible_directions != 2) {
+                else if (num_possible_directions != 2)
                     throw std::runtime_error("expected only 1 possible path to go!");
-                } 
 
                 if (matrix[y][x-1] != ' ' && direction != EAST) {
                     direction = WEST;
@@ -97,6 +97,7 @@ public:
             } else if (direction == WEST) {
                 x -= 1;
             }
+            num_steps += 1;
         }
 
         std::cout << "(part1) : ";
@@ -104,10 +105,7 @@ public:
             std::cout << ch;
         std::cout << std::endl;
 
-    }
-
-    void part2(const string_matrix& matrix) {
-        std::cout << "(part2) : " << std::endl;
+        std::cout << "(part2) : " << num_steps << std::endl;
     }
 };
 
@@ -117,7 +115,6 @@ int main() {
     auto data = parser.parse();
 
     Day19Solution solution;
-    solution.part1(data);
-    solution.part2(data);
+    solution.both_parts(data);
     return 0;
 }
