@@ -1,10 +1,5 @@
 #include <algorithm>
 #include <fstream>
-#include <list>
-//#include <format>
-//#include <functional>
-//#include <ranges>
-//#include <cmath>
 
 #include "abstract_solution.h"
 #include "file_input.h"
@@ -61,10 +56,8 @@ public:
                 }
                 current_pos += 1;
             }
-
         }
 
-        // 0 will always be at the beginning!
         std::cout << "(part2) item_after_0: " << item_after_0 << std::endl;
     }
 };
