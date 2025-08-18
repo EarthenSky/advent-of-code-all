@@ -28,6 +28,7 @@ private:
             result.emplace<char>(ch0);
         return result;
     }
+    // the compiler should be able to auto generate this func ;-;
     std::variant<int,char,std::monostate> to_optional_variant(std::variant<int,char> operand) const noexcept {
         std::variant<int,char,std::monostate> result;
         if (std::holds_alternative<int>(operand)) {
@@ -355,11 +356,6 @@ public:
         size_t num_p1_sends = 0;
 
         while (!(p0_is_waiting && p1_is_waiting)) {
-            //std::cout
-            //    << instructions[iptr].name << " "
-            //    << variant_to_string(instructions[iptr].first) << " "
-            //    << variant_to_string(instructions[iptr].second) << std::endl;
-
             p0_is_waiting = evaluate_instruction_v2(
                 instructions,
                 p0_registers,
