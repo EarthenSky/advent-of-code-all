@@ -2,8 +2,8 @@
 #include <array>
 #include <fstream>
 #include <format>
+#include <ranges>
 #include <regex>
-#include <variant>
 #include <cctype>
 #include <cmath>
 
@@ -43,7 +43,7 @@ public:
 
 class Day20Solution {
 public:
-    void both_parts(const particle_list& particles) const {
+    void part1(const particle_list& particles) const {
         // After infinity timesteps the initial position and velocity will no longer matter (10 + inf = inf); the point
         // will be wherever it's acceleration sets the velocity to. So we can determine the closest point via magnitude
         // of acceleration (smallest).
@@ -81,6 +81,116 @@ public:
 
         std::cout << "(part1) : " << target_i << std::endl;
     }
+
+    bool points_may_intersect(std::array<int64_t, 9> p1, std::array<int64_t, 9> p2) const noexcept {
+        const size_t NDIM = 3;
+        for (size_t axis_i = 0; axis_i < NDIM; axis_i++) {
+            if (
+                // position strictly greater; this is for the case where (p,v,a) are all equal in one axis; they could
+                // still collide! 
+                p1[0 * 3 + axis_i] > p2[0 * 3 + axis_i]
+                && p1[1 * 3 + axis_i] >= p2[1 * 3 + axis_i]
+                && p1[2 * 3 + axis_i] >= p2[2 * 3 + axis_i]
+            ) {
+                return false;
+            } else if (
+                p1[0 * 3 + axis_i] < p2[0 * 3 + axis_i]
+                && p1[1 * 3 + axis_i] <= p2[1 * 3 + axis_i]
+                && p1[2 * 3 + axis_i] <= p2[2 * 3 + axis_i]
+            ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void part2(const particle_list& particles2) const {
+        // TODO: compute collisions
+        // two particle will not collide if (in any axis) their velocity + acceleration match, are in opposite directions, and 
+        
+        // IDEA 1:
+        // we can improve performance by taking n steps before checking collisions, but only when the minimum distance
+        // between any two points is smaller than the largest possible step... ? Or not, perhaps...
+        // OR if the velocity of one is larger than the other in that axis, is further in that direction, and the
+        // accelerations are equal or will continue the trend in this axis. 
+
+        // NOTE 2:
+        // The particles are in a box of radius 4000, but they have non-zero acceleration that never dampens, which
+        // means that they will probably be mostly done colliding after several hundred timesteps
+        //
+        // Takes O(n^2) to check every pair for collisions (could probably get it done in O(n log n) using a kdtree).
+        // n is 1000, so we're looking at roughly 1s per 1k timesteps... That's doable.
+
+        particle_list particles_left = particles2;
+        size_t num_escaped_particles = 0;
+
+        size_t timestep = 0;
+        while (particles_left.size() != 0) {
+            std::cout << "num particles: " << particles_left.size() << std::endl;
+            // look for collisions
+            std::vector<size_t> garbage_list;
+            for (size_t pi = 0; pi < particles_left.size(); pi++) {
+                for (size_t pj = 0; pj < particles_left.size(); pj++) {
+                    if (pi == pj) continue;
+                    if (
+                        particles_left[pi][0] == particles_left[pj][0]
+                        && particles_left[pi][1] == particles_left[pj][1]
+                        && particles_left[pi][2] == particles_left[pj][2]
+                    ) {
+                        // TODO: this is fully O(n^2) (w/ early exit), but we could probably get it down to O(n^2) 1/2!
+                        garbage_list.push_back(pi);
+                        break;
+                    }
+                }
+            }
+
+            // TODO: we can do the removal in O(n) time, rather than O(nk)
+            // There's a fancy erase using find_if or something w/ ranges approach!
+
+            // remove garbage in reverse order, so we don't mess with the index of items behind
+            for (size_t garbage_i : std::ranges::reverse_view(garbage_list)) {
+                particles_left.erase(particles_left.begin() + garbage_i);
+            }
+            garbage_list.clear();
+
+            // update particle data
+            for (auto& particle : particles_left) {
+                // accel
+                particle[3] += particle[6];
+                particle[4] += particle[7];
+                particle[5] += particle[8];
+
+                // velocity
+                particle[0] += particle[3];
+                particle[1] += particle[4];
+                particle[2] += particle[5];
+            }
+
+            // check which particles can never run into others anymore
+            for (size_t pi = 0; pi < particles_left.size(); pi++) {
+                // if only 1 particle left, it will be removed!
+                bool any_may_intersect = false;
+                for (size_t pj = pi+1; pj < particles_left.size(); pj++) {
+                    if (points_may_intersect(particles_left[pi], particles_left[pj])) {
+                        // if two points may intersect we canot prune, so exit early
+                        any_may_intersect = true;
+                        break;
+                    }
+                }
+
+                if (!any_may_intersect) {
+                    garbage_list.push_back(pi);
+                    num_escaped_particles += 1;
+                }
+            }
+
+            for (size_t garbage_i : std::ranges::reverse_view(garbage_list)) {
+                particles_left.erase(particles_left.begin() + garbage_i);
+            }
+        }
+
+        std::cout << "(part2) num_escaped_particles: " << num_escaped_particles << std::endl;
+    }
 };
 
 int main() {
@@ -89,6 +199,7 @@ int main() {
     auto data = parser.parse();
 
     Day20Solution solution;
-    solution.both_parts(data);
+    solution.part1(data);
+    solution.part2(data);
     return 0;
 }
