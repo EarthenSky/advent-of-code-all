@@ -64,18 +64,26 @@ public:
 class Day21Solution {
     void rotated_cw(std::string& pattern) const {
         if (pattern.size() == 2 * 2) {
-            pattern = std::format(
-                "{}{}{}{}",
-                pattern[2], pattern[0],
-                pattern[3], pattern[1]
-            );
+            char temp0 = pattern[0];
+            pattern[0] = pattern[2];
+            pattern[2] = pattern[3];
+            pattern[3] = pattern[1];
+            pattern[1] = temp0;
         } else {
-            pattern = std::format(
-                "{}{}{}{}{}{}{}{}{}",
-                pattern[6], pattern[3], pattern[0],
-                pattern[7], pattern[4], pattern[1],
-                pattern[8], pattern[5], pattern[2]
-            );
+            char temp0 = pattern[0];
+            char temp1 = pattern[1];
+
+            pattern[0] = pattern[6];
+            pattern[6] = pattern[8];
+            pattern[8] = pattern[2];
+            pattern[2] = temp0;
+
+            // pattern[4] = pattern[4];
+
+            pattern[1] = pattern[3];
+            pattern[3] = pattern[7];
+            pattern[7] = pattern[5];
+            pattern[5] = temp1;
         }
     }
     void flipped_over_y_axis(std::string& pattern) const {
@@ -121,7 +129,7 @@ class Day21Solution {
         throw std::runtime_error("ERROR: ran into a pattern not in the rulebook!");
     }
 public:
-    void part1(const rulebook& rules) const {
+    void both_parts(const rulebook& rules) const {
         size_t pattern_width = 3;
         std::vector<char> pattern = {
             false, true,  false,
@@ -142,27 +150,28 @@ public:
                     size_t chunk_x = chunk_i % (pattern_width / 2);
                     size_t chunk_y = chunk_i / (pattern_width / 2);
                     
-                    std::string chunk_str = this->get_matching_chunk(rules, std::format(
+                    std::string query_str = std::format(
                         "{}{}{}{}",
                         pattern[(chunk_y*2 + 0) * pattern_width + chunk_x*2 + 0],
                         pattern[(chunk_y*2 + 0) * pattern_width + chunk_x*2 + 1],
                         pattern[(chunk_y*2 + 1) * pattern_width + chunk_x*2 + 0],
                         pattern[(chunk_y*2 + 1) * pattern_width + chunk_x*2 + 1]
-                    ));
+                    );
+                    // TODO: perhaps an iterator of std::string would be better?
+                    const std::string& chunk_str = this->get_matching_chunk(rules, query_str);
 
-                    // TODO: see if there are any (more) easy DRY gains!
-
-                    new_pattern[(chunk_y*3 + 0) * new_pattern_width + chunk_x*3 + 0] = chunk_str[0];
-                    new_pattern[(chunk_y*3 + 0) * new_pattern_width + chunk_x*3 + 1] = chunk_str[1];
-                    new_pattern[(chunk_y*3 + 0) * new_pattern_width + chunk_x*3 + 2] = chunk_str[2];
-
-                    new_pattern[(chunk_y*3 + 1) * new_pattern_width + chunk_x*3 + 0] = chunk_str[3];
-                    new_pattern[(chunk_y*3 + 1) * new_pattern_width + chunk_x*3 + 1] = chunk_str[4];
-                    new_pattern[(chunk_y*3 + 1) * new_pattern_width + chunk_x*3 + 2] = chunk_str[5];
-
-                    new_pattern[(chunk_y*3 + 2) * new_pattern_width + chunk_x*3 + 0] = chunk_str[6];
-                    new_pattern[(chunk_y*3 + 2) * new_pattern_width + chunk_x*3 + 1] = chunk_str[7];
-                    new_pattern[(chunk_y*3 + 2) * new_pattern_width + chunk_x*3 + 2] = chunk_str[8];
+                    std::copy(
+                        chunk_str.begin(), chunk_str.begin()+3,
+                        new_pattern.begin() + (chunk_y*3 + 0) * new_pattern_width + chunk_x*3 + 0
+                    );
+                    std::copy(
+                        chunk_str.begin()+3, chunk_str.begin()+6,
+                        new_pattern.begin() + (chunk_y*3 + 1) * new_pattern_width + chunk_x*3 + 0
+                    );
+                    std::copy(
+                        chunk_str.begin()+6, chunk_str.begin()+9,
+                        new_pattern.begin() + (chunk_y*3 + 2) * new_pattern_width + chunk_x*3 + 0
+                    );
                 }
                 pattern = std::move(new_pattern);
                 pattern_width = new_pattern_width;
@@ -177,7 +186,7 @@ public:
                     
                     // TODO: replacing std::string with std::array or something more compact & easy to construct will
                     // probably be the fast way out
-                    std::string chunk_str = this->get_matching_chunk(rules, std::format(
+                    const std::string& chunk_str = this->get_matching_chunk(rules, std::format(
                         "{}{}{}{}{}{}{}{}{}",
                         pattern[(chunk_y*3 + 0) * pattern_width + chunk_x*3 + 0],
                         pattern[(chunk_y*3 + 0) * pattern_width + chunk_x*3 + 1],
@@ -191,8 +200,6 @@ public:
                         pattern[(chunk_y*3 + 2) * pattern_width + chunk_x*3 + 1],
                         pattern[(chunk_y*3 + 2) * pattern_width + chunk_x*3 + 2]
                     ));
-
-                    // TODO: see if there are any (more) easy DRY gains!
 
                     std::copy(
                         chunk_str.begin(), chunk_str.begin()+4,
@@ -248,10 +255,6 @@ public:
 
         std::cout << "(part2) num_active_pixels: " << num_active_pixels << std::endl;
     }
-
-    void part2(const rulebook& rules) const {
-        // std::cout << "(part2) num_escaped_particles: " << num_escaped_particles << std::endl;
-    }
 };
 
 int main() {
@@ -260,7 +263,6 @@ int main() {
     auto data = parser.parse();
 
     Day21Solution solution;
-    solution.part1(data);
-    solution.part2(data);
+    solution.both_parts(data);
     return 0;
 }
