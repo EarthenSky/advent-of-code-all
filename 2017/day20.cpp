@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <fstream>
-#include <format>
+//#include <format>
 #include <ranges>
 #include <regex>
 #include <cctype>
@@ -105,7 +105,7 @@ public:
     }
 
     void part2(const particle_list& particles2) const {
-        // TODO: compute collisions
+        // # compute collisions!
         // two particle will not collide if (in any axis) their velocity + acceleration match, are in opposite directions, and 
         
         // IDEA 1:
@@ -148,9 +148,8 @@ public:
             // There's a fancy erase using find_if or something w/ ranges approach!
 
             // remove garbage in reverse order, so we don't mess with the index of items behind
-            for (size_t garbage_i : std::ranges::reverse_view(garbage_list)) {
+            for (size_t garbage_i : std::ranges::reverse_view(garbage_list))
                 particles_left.erase(particles_left.begin() + garbage_i);
-            }
             garbage_list.clear();
 
             // update particle data
@@ -184,9 +183,8 @@ public:
                 }
             }
 
-            for (size_t garbage_i : std::ranges::reverse_view(garbage_list)) {
+            for (size_t garbage_i : std::ranges::reverse_view(garbage_list))
                 particles_left.erase(particles_left.begin() + garbage_i);
-            }
         }
 
         std::cout << "(part2) num_escaped_particles: " << num_escaped_particles << std::endl;
