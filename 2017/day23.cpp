@@ -107,9 +107,49 @@ public:
         std::cout << "(part1) num_multiplies: " << num_multiplies << std::endl;
     }
 
-    void part2(const std::vector<Instruction>& rules) const {
+    void part2() const {
+        // I know I thought of a bunch of automatic optimizations, but instead I
+        // translated the code to C, optimized it there, then implemented it below.
+        // Brain power!
 
-        // std::cout << "(part2) num_infection_bursts: " << num_infection_bursts << std::endl;
+        int a = 1;
+        int b = (a==0) ? 93 : 109300;
+        int c = (a==0) ? 93 : 126300;
+        int h = 0;
+
+        while (true) {
+            int f = 1;
+            {
+                int i = 2;
+                do {
+                    // only check if b is i * j if i is a factor of b!
+                    if (b % i == 0) {
+                        int j = 2;
+                        do {
+                            if (i * j == b)
+                                f = 0;
+                            j += 1;
+                        } while (j != b);
+                    }
+                    // if only we were rich enough to afford for loops
+                    // (we could but I don't wanna :3)
+                    i += 1;
+                } while (i != b);
+            }
+
+            // the first time f is set zero, count the number of iterations!
+            if (f == 0)
+                h += 1;
+
+            // will loop 1000 times
+            if (b == c)
+                break;
+
+            b += 17;
+            // std::cout << "b: " << b << std::endl;
+        }
+
+        std::cout << "(part2) h: " << h << std::endl;
     }
 };
 
@@ -120,6 +160,6 @@ int main() {
 
     Day23Solution solution;
     solution.part1(data);
-    solution.part2(data);
+    solution.part2();
     return 0;
 }
