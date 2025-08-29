@@ -107,6 +107,87 @@ private:
 
         return max_strength;
     }
+
+    void longest_strongest_bridge(
+        std::list<std::pair<int,int>>& remaining_components,
+        size_t num_remaining,
+        int next_num_pins,
+        int& longest,
+        int& strongest
+    ) const {
+        // base case for clarity
+        if (num_remaining == 0)
+            return;
+
+        // filter on input num_pins (TODO: binary search would probably be fastest? -> possibly)
+        auto component_it = remaining_components.begin();
+        for (size_t i = 0; i < num_remaining; i++) {
+            auto curr_component = *component_it;
+
+            if (curr_component.first == next_num_pins) {
+                // next will alwyas exist b/c component_it only becomes it.end() at the END of the final loop 
+                auto component_next_it = std::next(component_it);
+                remaining_components.splice(remaining_components.end(), remaining_components, component_it);
+
+                // Recursively compute strength using a smaller set of remaining components -> only uses O(n^2)
+                // memory, where n ~= 50, so we're doing good!
+                int out_length = 0;
+                int out_strength = 0;
+                longest_strongest_bridge(
+                    remaining_components,
+                    num_remaining - 1,
+                    curr_component.second,
+                    out_length,
+                    out_strength
+                );
+                out_strength += curr_component.first + curr_component.second;
+                out_length += 1;
+
+                if (out_length > longest) {
+                    longest = out_length;
+                    strongest = out_strength;
+                } else if (out_length == longest && out_strength >= strongest) {
+                    strongest = out_strength;
+                }
+
+                // NOTE: b/c of this insert, the order should be fine!
+                remaining_components.splice(component_next_it, remaining_components, component_it);
+            }
+
+            // NOTE: ports are allowed to be backwards! try all the ports again, but backwards!
+            if (
+                curr_component.second == next_num_pins
+                // NOTE: adding this case tripled performance!
+                && curr_component.first != curr_component.second
+            ) {
+                auto component_next_it = std::next(component_it);
+                remaining_components.splice(remaining_components.end(), remaining_components, component_it);
+
+                int out_length = 0;
+                int out_strength = 0;
+                longest_strongest_bridge(
+                    remaining_components,
+                    num_remaining - 1,
+                    curr_component.first,
+                    out_length,
+                    out_strength
+                );
+                out_strength += curr_component.first + curr_component.second;
+                out_length += 1;
+
+                if (out_length > longest) {
+                    longest = out_length;
+                    strongest = out_strength;
+                } else if (out_length == longest && out_strength >= strongest) {
+                    strongest = out_strength;
+                }
+
+                remaining_components.splice(component_next_it, remaining_components, component_it);
+            }
+
+            component_it++;
+        }
+    }
 public:
     void part1(const list_pairs& components) const {
         // construct ll
@@ -117,7 +198,23 @@ public:
         std::cout << "(part1) bridge_strength: " << bridge_strength(mut_components, mut_components.size(), 0) << std::endl;
     }
 
-    void part2() const {
+    void part2(const list_pairs& components) const {
+        std::list<std::pair<int,int>> mut_components;
+        for (auto comp : components)
+            mut_components.push_back(comp);
+
+        int longest = 0;
+        int strongest = 0;
+
+        longest_strongest_bridge(
+            mut_components,
+            mut_components.size(),
+            0,
+            longest,
+            strongest
+        );
+
+        std::cout << "(part2) longest_strongest: " << strongest << std::endl;
     }
 };
 
@@ -128,6 +225,6 @@ int main() {
 
     Day24Solution solution;
     solution.part1(data);
-    // solution.part2();
+    solution.part2(data);
     return 0;
 }
