@@ -1,0 +1,24 @@
+cmake_minimum_required(VERSION 3.20)
+project(AdventOfCode_2016 VERSION 0.1)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED True)
+set(CMAKE_BUILD_TYPE Debug)
+
+if (!MSVC)
+    add_compile_options(-Wall)
+endif()
+
+#if (MSVC)
+#    set(CMAKE_C_FLAGS_RELEASE "/O2 /Zi /DNDEBUG")
+#    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/DEBUG /PROFILE")
+#endif()
+
+# ------------------------------------------------ #
+# days
+
+add_executable(day1 day1.c)
+# add_executable(day2 day2.c)
+# target_link_libraries(day2 m) # only for unix?
+
+# ------------------------------------------------ #
