@@ -25,4 +25,9 @@ char *get_file_contents(const char *filename) {
     }
 }
 
+/// @brief these don't exist in math.h !
+static inline int min(int a, int b) { return a < b ? a : b; }
+/// @brief these don't exist in math.h !
+static inline int max(int a, int b) { return a > b ? a : b; }
+
 #endif
