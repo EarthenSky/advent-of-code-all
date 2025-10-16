@@ -1,13 +1,11 @@
 #include <assert.h>
 #include <stdint.h>
+#include <stdlib.h> // free()
 #include <stdio.h>  // sscanf() ?
-#include <stdlib.h> // 
 #include <stdbool.h> // true / false
 #include <string.h> // strlen()
 
 #include <sys/types.h> // ssize_t
-
-#include "../2015/helpers.h"
 
 void part1();
 void part2();
@@ -66,21 +64,34 @@ void part1() {
         line_size = getline(&line, &line_buffer_size, f);
         if (line == NULL) {
             perror("ERROR: getline alloc failed");
+
+            free(line);
+            line = NULL;
             return;
         } else if (line_size <= 0) {
+            free(line);
+            line = NULL;
             break;
         }
 
         // ignore newline at end of line
         for (size_t i = 0; i < line_size; i++) {
-            if (line[i] == '\n')
+            if (line[i] == '\n') {
+                free(line);
+                line = NULL;
                 continue;
-            else if (!translate_button(line[i], &current_button))
+            } else if (!translate_button(line[i], &current_button)) {
+                free(line);
+                line = NULL;
                 return;
+            }
         }
 
         password[password_size] = current_button;
         password_size += 1;
+
+        free(line);
+        line = NULL;
     }
 
     printf("password = ");
@@ -203,23 +214,37 @@ void part2() {
         line_size = getline(&line, &line_buffer_size, f);
         if (line == NULL) {
             perror("ERROR: getline alloc failed");
+
+            free(line);
+            line = NULL;
             return;
         } else if (line_size <= 0) {
+            free(line);
+            line = NULL;
             break;
         }
 
         // ignore newline at end of line
         for (size_t i = 0; i < line_size; i++) {
-            if (line[i] == '\n')
+            if (line[i] == '\n') {
+                free(line);
+                line = NULL;
                 continue;
+            }
             
-            printf("(%llu) %c\n", i, current_button);
-            if (!translate_button_2(line[i], &current_button))
+            // printf("(%llu) %c\n", i, current_button);
+            if (!translate_button_2(line[i], &current_button)) {
+                free(line);
+                line = NULL;
                 return;
+            }
         }
 
         password[password_size] = current_button;
         password_size += 1;
+
+        free(line);
+        line = NULL;
     }
 
     printf("password = ");
