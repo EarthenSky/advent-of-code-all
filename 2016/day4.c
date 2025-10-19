@@ -43,7 +43,7 @@ void part1(const char *file_bytes, size_t num_bytes) {
         #define NO_ELEMENT (-1)
         // TODO: is this zero init?
         // TODO: what header does int32_t come from?
-        int32_t histogram[27] = {0};
+        int32_t histogram[26] = {0};
         // TODO: is name null terminated?
         size_t name_length = strlen(name);
         for (size_t i = 0; i < name_length; i++) {
@@ -87,7 +87,55 @@ void part1(const char *file_bytes, size_t num_bytes) {
 void part2(const char *file_bytes, size_t num_bytes) {
     printf("part 2:\n");
 
-    // TODO: this
+    size_t file_offset = 0;
+
+    while (true) {
+        char* name = NULL;
+        unsigned int sector_id = 0;
+        char* checksum = NULL;
+        int num_bytes_read = 0;
+
+        errno = 0;
+        int num_matches = sscanf(
+            file_bytes + file_offset,
+            // Characters need to be escaped in sets, but everything except % is
+            // treated as a literal outside
+            // Spaces represent optional whitespace
+            " %m[a-z\\-]%u[%m[a-z]]%n",
+            &name, &sector_id, &checksum, &num_bytes_read
+        );
+        if (num_matches == EOF) {
+            break;
+        } else if (num_matches != 3) {
+            // TODO: how to print to stderr?
+            printf("ERROR: sscanf() failed to match everything. num_matches=%d\n", num_matches);
+            exit(1);
+        } else if (errno != 0) {
+            perror("sscanf");
+        }
+
+        // apply cipher
+        size_t name_size = strlen(name);
+        for (size_t i = 0; i < name_size; i++) {
+            if (name[i] == '-') {
+                name[i] = ' ';
+            } else if (name[i] >= 'a' && name[i] <= 'z') {
+                name[i] = 'a' + ((name[i] - 'a') + sector_id) % 26;
+            } else {
+                printf("ERROR: unexpected character in name\n");
+                exit(1);
+            }
+        }
+
+        file_offset += num_bytes_read;
+
+        // I used Ctrl+F to find north in the list of converted sectors
+        if (strncmp("north", name, 5) == 0)
+            printf("%s = %d\n", name, sector_id);
+
+        free(name);
+        free(checksum);
+    }
 }
 
 int main() {
