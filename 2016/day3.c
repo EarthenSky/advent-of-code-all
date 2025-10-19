@@ -79,6 +79,7 @@ void part2(const char *file_contents, size_t file_size) {
             &v[6], &v[7], &v[8],
             &tokens_parsed
         );
+        // TODO: figure out where EOF lives
         if (num_matches == 0 || num_matches == EOF) {
             break;
         } else if (num_matches != 9) {
