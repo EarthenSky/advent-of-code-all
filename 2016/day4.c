@@ -7,7 +7,7 @@
 #include <errno.h> // errno 
 
 void part1(const char *file_bytes, size_t num_bytes) {
-    printf("part1:\n");
+    printf("part 1:\n");
 
     size_t file_offset = 0;
     uint32_t sum_of_valid_sector_ids = 0;
@@ -19,28 +19,25 @@ void part1(const char *file_bytes, size_t num_bytes) {
         int num_bytes_read = 0;
 
         errno = 0;
-        int result = sscanf(
+        int num_matches = sscanf(
             file_bytes + file_offset,
-            "%m[a-z\\-]+%u\\[%m[a-z]+\\]%n",
+            // Characters need to be escaped in sets, but everything except % is
+            // treated as a literal outside
+            // Spaces represent optional whitespace
+            " %m[a-z\\-]%u[%m[a-z]]%n",
             &name, &sector_id, &checksum, &num_bytes_read
         );
-        if (result == EOF) {
+        if (num_matches == EOF) {
             break;
-        } else if (result != 4) {
-            printf("ERROR: sscanf failed to match something. result = %d\n", result);
+        } else if (num_matches != 3) {
+            // TODO: how to print to stderr?
+            printf("ERROR: sscanf() failed to match everything. num_matches=%d\n", num_matches);
             exit(1);
         } else if (errno != 0) {
             perror("sscanf");
         }
 
-        if (name == NULL) {
-            perror("IDK why this is happening");
-            exit(1);
-        } else if (checksum == NULL) {
-            perror("WHYYYYYYYYYY");
-            exit(1);
-        }
-            
+        // printf("num_bytes_read = %d\n", num_bytes_read);
         file_offset += num_bytes_read;
 
         #define NO_ELEMENT (-1)
@@ -48,9 +45,7 @@ void part1(const char *file_bytes, size_t num_bytes) {
         // TODO: what header does int32_t come from?
         int32_t histogram[27] = {0};
         // TODO: is name null terminated?
-        printf("before strlen\n");
         size_t name_length = strlen(name);
-        printf("after strlen\n");
         for (size_t i = 0; i < name_length; i++) {
             if (name[i] == '-') {
                 continue;
@@ -61,12 +56,11 @@ void part1(const char *file_bytes, size_t num_bytes) {
                 exit(1); // exit frees all our memory, so dw about it
             }
         }
-        printf("after loop\n");
 
         // 5 most common items from the histogram
         char top_five_letters[6] = { '\0' };
         for (size_t i = 0; i < 5; i++) {
-            uint32_t max_occurences = histogram[0];
+            int32_t max_occurences = histogram[0];
             size_t max_occurences_i = 0;
             for (size_t j = 1; j < 27; j++) {
                 // strictly GT ensures the smallest letter with equal number of
@@ -76,25 +70,24 @@ void part1(const char *file_bytes, size_t num_bytes) {
                     max_occurences_i = j;
                 }
             }
-            top_five_letters[i] = max_occurences_i;
+            top_five_letters[i] = 'a' + max_occurences_i;
+            histogram[max_occurences_i] = NO_ELEMENT;
         }
-        printf("after loop2\n");
-
-        printf("len %llu\n", strlen(top_five_letters));
-        printf("len %llu, len2 %llu\n", strlen(top_five_letters), strlen(checksum));
 
         if (strcmp(top_five_letters, checksum) == 0)
             sum_of_valid_sector_ids += sector_id;
 
-        printf("after cmp\n");
-
         free(name);
         free(checksum);
-
-        printf("after free\n");
     }
 
     printf("sum_of_valid_sector_ids = %u\n", sum_of_valid_sector_ids);
+}
+
+void part2(const char *file_bytes, size_t num_bytes) {
+    printf("part 2:\n");
+
+    // TODO: this
 }
 
 int main() {
@@ -128,6 +121,7 @@ int main() {
     }
 
     part1(file_bytes, num_bytes);
+    part2(file_bytes, num_bytes);
 
     free(file_bytes);
     return 0;
