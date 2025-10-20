@@ -1,17 +1,10 @@
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>  // sscanf() ?
+#include <stdio.h>  // sscanf(), stderr, fprintf
 #include <stdlib.h> // llabs()
 #include <string.h>
 
 #include "../2015/helpers.h"
-
-enum Direction {
-    NORTH = 0,
-    EAST  = 1,
-    SOUTH,
-    WEST
-};
 
 void part1();
 void part2();
@@ -21,6 +14,13 @@ int main() {
     part2();
     return 0;
 }
+
+enum Direction {
+    NORTH = 0,
+    EAST  = 1,
+    SOUTH,
+    WEST
+};
 
 enum Direction rotate_left(enum Direction direction) {
     return (direction - 1) % 4;
@@ -49,8 +49,7 @@ void part1() {
         } else if (instructions[chi + 0] == 'R') {
             direction = rotate_right(direction);
         } else {
-            // TODO: how to printf to stderr?
-            printf("ERROR: got unexpected char %c that is not L or R (index %llu).\n", instructions[chi + 0], chi);
+            fprintf(stderr, "ERROR: got unexpected char %c that is not L or R (index %llu).\n", instructions[chi + 0], chi);
             exit(1);
         }
 
@@ -73,8 +72,6 @@ void part1() {
         chi += 3 + num_chars_matched;
     }
 
-    // TODO: how to deal with the possible differnce between int64_t and long long int?
-    // like what if they are a different size; what does C11 do?
     printf("shortest_distance = %lld\n", llabs(x) + llabs(y));
 }
 
@@ -93,6 +90,10 @@ void part2() {
     const size_t MAX_NUM_SQUARES = 1024 * 1024;
     size_t position_i = 0;
     struct vec2 *position_list = malloc(MAX_NUM_SQUARES * sizeof(struct vec2));
+    if (position_list == NULL) {
+        fprintf(stderr, "ERROR: malloc failed\n");
+        exit(1);
+    }
 
     position_list[position_i] = (struct vec2) { .x = 0, .y = 0 };
     position_i += 1;
@@ -108,8 +109,11 @@ void part2() {
         } else if (instructions[chi + 0] == 'R') {
             direction = rotate_right(direction);
         } else {
-            // TODO: how to printf to stderr?
-            printf("ERROR: got unexpected char %c that is not L or R (index %llu).\n", instructions[chi + 0], chi);
+            fprintf(
+                stderr,
+                "ERROR: got unexpected char %c that is not L or R (index %llu).\n",
+                instructions[chi + 0], chi
+            );
             exit(1);
         }
 

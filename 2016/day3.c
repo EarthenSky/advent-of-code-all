@@ -1,6 +1,6 @@
-#include <assert.h>
-#include <stdint.h> // ?
-#include <stdio.h>  // sscanf() ?
+#include <assert.h> // assert()
+#include <stdint.h> // uint32_t, uint64_t, etc...
+#include <stdio.h>  // sscanf(), EOF
 #include <stdlib.h> // malloc(), free()
 #include <stdbool.h> // true / false
 #include <string.h> // strlen()
@@ -11,6 +11,13 @@
 
 #include "../2015/helpers.h"
 
+#ifndef UINT32_MAX
+#error "ERROR: this program requires uint32_t to be defined"
+#endif
+#ifndef UINT64_MAX
+#error "ERROR: this program requires uint64_t to be defined"
+#endif
+
 void part1(const char *file_contents, size_t file_size);
 void part2(const char *file_contents, size_t file_size);
 
@@ -20,7 +27,7 @@ int main() {
     part1(file_contents, file_size);
     part2(file_contents, file_size);
     free(file_contents);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 bool is_valid_triangle(uint64_t a, uint64_t b, uint64_t c) {
@@ -44,6 +51,10 @@ void part1(const char *file_contents, size_t file_size) {
 
     // make a copy for strtok to mangle
     char *file_contents_copy = (char *) malloc(file_size+1);
+    if (file_contents_copy == NULL) {
+        fprintf(stderr, "ERROR: malloc() failed\n");
+        exit(EXIT_FAILURE);
+    }
     memcpy(file_contents_copy, file_contents, file_size+1);
 
     uint32_t num_valid_triangles = 0;
@@ -56,15 +67,12 @@ void part1(const char *file_contents, size_t file_size) {
             num_valid_triangles += 1;
     }
 
+    free(file_contents_copy);
     printf("num_valid_triangles = %u\n", num_valid_triangles);
 }
 
 void part2(const char *file_contents, size_t file_size) {
     printf("part2:\n");
-
-    // make a copy for strtok to mangle
-    // char *file_contents_copy = (char *) malloc(file_size+1);
-    // memcpy(file_contents_copy, file_contents, file_size+1);
 
     uint32_t num_valid_triangles = 0;
     size_t file_i = 0;
@@ -79,11 +87,10 @@ void part2(const char *file_contents, size_t file_size) {
             &v[6], &v[7], &v[8],
             &tokens_parsed
         );
-        // TODO: figure out where EOF lives
-        if (num_matches == 0 || num_matches == EOF) {
+        if (num_matches == EOF) {
             break;
         } else if (num_matches != 9) {
-            perror("ERROR: the file should have a number of integers divisible by 9");
+            fprintf(stderr, "ERROR: the file should have a number of integers divisible by 9\n");
             return;
         }
 

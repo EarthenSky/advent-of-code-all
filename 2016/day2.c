@@ -1,10 +1,11 @@
 #include <assert.h>
 #include <stdint.h>
-#include <stdlib.h> // free()
+#include <stdlib.h> // free(), EXIT_SUCCESS, EXIT_FAILURE
 #include <stdio.h>  // sscanf() ?
 #include <stdbool.h> // true / false
 #include <string.h> // strlen()
 
+// sys means POSIX here
 #include <sys/types.h> // ssize_t
 
 void part1();
@@ -13,7 +14,7 @@ void part2();
 int main() {
     part1();
     part2();
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 // returns success
@@ -36,22 +37,22 @@ bool translate_button(char ch, int8_t *current_button) {
                 *current_button += 1;
             return true;
         default:
-            printf("ERROR: got unknown char %c (%d) in line\n", ch, ch);
+            fprintf(stderr, "ERROR: got unknown char %c (%d) in line\n", ch, ch);
             return false;
     }
 }
+
+#define MAX_PASSWORD_SIZE (32)
 
 void part1() {
     printf("part 1:\n");
 
     FILE *f = fopen("input_day2.txt", "r");
     if (f == NULL) {
-        // TODO: read through this
-        perror("fopen");
+        perror("fopen()");
         exit(EXIT_FAILURE);
     }
 
-    #define MAX_PASSWORD_SIZE 32
     uint8_t password[MAX_PASSWORD_SIZE];
     size_t password_size = 0;
 
@@ -59,11 +60,13 @@ void part1() {
 
     char *line = NULL;
     size_t line_buffer_size = 0;
+    // TODO: oops, this is part of a C extension!
     ssize_t line_size = 0;
     while (true) {
+        // TODO: oops, this is part of a C extension!
         line_size = getline(&line, &line_buffer_size, f);
         if (line == NULL) {
-            perror("ERROR: getline alloc failed");
+            fprintf(stderr, "ERROR: getline() alloc failed");
 
             free(line);
             line = NULL;
@@ -186,7 +189,7 @@ bool translate_button_2(char ch, char *current_button) {
                 *current_button += 1;
             return true;
         default:
-            printf("ERROR: got unknown char %c (%d) in line\n", ch, ch);
+            fprintf(stderr, "ERROR: got unknown char %c (%d) in line\n", ch, ch);
             return false;
     }
 }
@@ -196,12 +199,10 @@ void part2() {
 
     FILE *f = fopen("input_day2.txt", "r");
     if (f == NULL) {
-        // TODO: read through this
-        perror("fopen");
+        perror("fopen()");
         exit(EXIT_FAILURE);
     }
 
-    #define MAX_PASSWORD_SIZE 32
     char password[MAX_PASSWORD_SIZE];
     size_t password_size = 0;
 
@@ -213,7 +214,7 @@ void part2() {
     while (true) {
         line_size = getline(&line, &line_buffer_size, f);
         if (line == NULL) {
-            perror("ERROR: getline alloc failed");
+            fprintf(stderr, "ERROR: getline() alloc failed");
 
             free(line);
             line = NULL;
@@ -232,7 +233,6 @@ void part2() {
                 continue;
             }
             
-            // printf("(%llu) %c\n", i, current_button);
             if (!translate_button_2(line[i], &current_button)) {
                 free(line);
                 line = NULL;
