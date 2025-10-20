@@ -3,10 +3,13 @@ project(AdventOfCode_2016 VERSION 0.1)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED True)
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 if (!MSVC)
-    add_compile_options(-Wall)
+    # add_compile_options(-Wall)
+    set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
 #if (MSVC)

@@ -2,6 +2,7 @@
 #include <stdlib.h> // exit()
 #include <string.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 const char* DOOR_ID = "ffykfhsq";
 
@@ -10,13 +11,12 @@ struct bits_128 {
 };
 
 uint32_t leftrotate(uint32_t x, uint32_t rotate_amount) {
-    rotate_amount = rotate_amount % 32;
+    rotate_amount %= 32;
     return (x << rotate_amount) + (x >> (32 - rotate_amount));
 }
 
-/// TODO: add support for malloc failure
 /// @brief this algorithm is derived from https://en.wikipedia.org/wiki/MD5
-struct bits_128 md5(const char* message) {
+struct bits_128 md5(char* message) {
     uint32_t s[64] = {
         // per-round shifts
         7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
@@ -54,14 +54,10 @@ struct bits_128 md5(const char* message) {
     size_t expanded_message_size = message_size + 1 + 8;
     size_t padding_size = 64 - expanded_message_size % 64;
     size_t new_message_size = expanded_message_size + padding_size;
-    uint8_t* new_message = malloc(new_message_size * sizeof(char));
-    // NOTE: new_message is not null terminated
-    // TODO: can these fail?
-    memcpy(new_message, message, message_size);
-    new_message[message_size + 0] = 0x80;
-    // TODO: give this a constant
-    memset(new_message + 1 + message_size, 0x00, padding_size * sizeof(char));
-    uint64_t *bits = (uint64_t *) &new_message[message_size + 1 + padding_size];
+    message[message_size + 0] = 0x80;
+    // TODO: can this fail?
+    memset(message + 1 + message_size, 0x00, padding_size * sizeof(char));
+    uint64_t *bits = (uint64_t *) &message[message_size + 1 + padding_size];
     *bits = message_size * 8;
 
     //for (size_t ci = 0; ci < new_message_size; ci++) {
@@ -71,7 +67,7 @@ struct bits_128 md5(const char* message) {
     // process the message in successive 512-bit chunks
     for (size_t message_i = 0; message_i < new_message_size; message_i += 64) {
         // TODO: why cast here or in malloc?
-        uint32_t *M = (uint32_t *) &new_message[message_i];
+        uint32_t *M = (uint32_t *) &message[message_i];
 
         uint32_t A = a0;
         uint32_t B = b0;
@@ -79,28 +75,41 @@ struct bits_128 md5(const char* message) {
         uint32_t D = d0;
 
         // Main loop:
-        for (size_t i = 0; i < 64; i++) {
-            uint32_t F, g;
-            if (i >= 0 && i < 16) {
-                F = (B & C) | (~B & D);
-                g = i;
-            } else if (16 <= i && i < 32) {
-                F = (D & B) | (~D & C);
-                g = (5*i + 1) % 16;
-            } else if (32 <= i && i < 48) {
-                F = B ^ C ^ D;
-                g = (3*i + 5) % 16;
-            } else if (48 <= i && i < 64) {
-                F = C ^ (B | ~D);
-                g = (7*i) % 16;
-            }
-
-            F = F + A + K[i] + M[g];
+        uint32_t F, g;
+        for (size_t i = 0; i < 16; i++) {
+            F = ((B & C) | (~B & D)) + A + K[i] + M[i];
             A = D;
             D = C;
             C = B;
 
-            B = B + leftrotate(F, s[i]);
+            B += leftrotate(F, s[i]);
+        }
+
+        for (size_t i = 16; i < 32; i++) {
+            F = ((D & B) | (~D & C)) + A + K[i] + M[(5*i + 1) % 16];
+            A = D;
+            D = C;
+            C = B;
+
+            B += leftrotate(F, s[i]);
+        }
+
+        for (size_t i = 32; i < 48; i++) {
+            F = (B ^ C ^ D) + A + K[i] + M[(3*i + 5) % 16];
+            A = D;
+            D = C;
+            C = B;
+
+            B += leftrotate(F, s[i]);
+        }
+
+        for (size_t i = 48; i < 64; i++) {
+            F = (C ^ (B | ~D)) + A + K[i] + M[(7*i) % 16];
+            A = D;
+            D = C;
+            C = B;
+
+            B += leftrotate(F, s[i]);
         }
 
         // Add this chunk's hash to the result so far:
@@ -109,8 +118,6 @@ struct bits_128 md5(const char* message) {
         c0 += C;
         d0 += D;
     }
-
-    free(new_message);
 
     return (struct bits_128) {                                                           
         .bytes = {
@@ -137,12 +144,13 @@ void part1() {
     char password[8+1] = { '\0' };
 
     const size_t MAX_CHARS_IN_U64 = 20;
-    char *to_hash_buffer = malloc((strlen(DOOR_ID) + MAX_CHARS_IN_U64) * sizeof(char));
+    char *to_hash_buffer = malloc((strlen(DOOR_ID) + MAX_CHARS_IN_U64) * sizeof(char) + 64);
     if (to_hash_buffer == NULL) {
         printf("ERROR: malloc failed\n");
         exit(1);
     }
 
+    // TODO: structure this test nicely too
     // small test for md5!
     // printf("md5() = %x\n", md5("The quick brown fox jumps over the lazy dog").bytes[0]);
     // exit(2);
@@ -170,13 +178,65 @@ void part1() {
         i += 1;
     }
 
-    // != f65a1172
     free(to_hash_buffer);
     printf("password: %s\n", password);
 }
 
 void part2() {
     printf("part 2:\n");
+
+    bool password_set[8] = { false };
+    char password[8+1] = { '\0' };
+
+    const size_t MAX_CHARS_IN_U64 = 20;
+    // extra 64 so that padding can be re-computed, etc. etc.
+
+    char *to_hash_buffer = malloc((strlen(DOOR_ID) + MAX_CHARS_IN_U64) * sizeof(char) + 64);
+    if (to_hash_buffer == NULL) {
+        printf("ERROR: malloc failed\n");
+        exit(1);
+    }
+
+    size_t i = 0;
+    while (true) {
+        sprintf(to_hash_buffer, "%s%llu", DOOR_ID, i);
+        struct bits_128 hash = md5(to_hash_buffer);
+
+        // if hash matches 0x00000xy...
+        if (
+            hash.bytes[0] == 0x00
+            && hash.bytes[1] == 0x00
+            && (hash.bytes[2] & 0xf0) == 0x00
+        ) {
+            uint8_t hex_index = hash.bytes[2] & 0x0f;
+            if (hex_index < 8 && !password_set[hex_index]) {
+                uint8_t hex_digit = (hash.bytes[3] & 0xf0) >> 4;
+                if (hex_digit <= 9) {
+                    password[hex_index] = '0' + hex_digit;
+                } else {
+                    password[hex_index] = 'a' + (hex_digit - 10);
+                }
+
+                password_set[hex_index] = true;
+                
+                bool password_is_complete = true;
+                for (size_t i = 0; i < 8; i++) {
+                    if (!password_set[i]) {
+                        password_is_complete = false;
+                        break;
+                    }
+                }
+
+                if (password_is_complete)
+                    break;
+            }
+        }
+
+        i += 1;
+    }
+
+    free(to_hash_buffer);
+    printf("password: %s\n", password);
 }
 
 int main() {
