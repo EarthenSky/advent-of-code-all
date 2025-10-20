@@ -11,12 +11,17 @@ char *get_file_contents(const char *filename) {
     fseek(f, 0, SEEK_END);
     size_t num_bytes = ftell(f);
     char *file_bytes = (char *) malloc(num_bytes+1);
+    if (file_bytes == NULL) {
+        printf("ERROR: malloc failed");
+        return NULL;
+    }
 
     fseek(f, 0, SEEK_SET);
     size_t num_bytes_read = fread(file_bytes, 1, num_bytes, f);
     if (num_bytes_read != num_bytes) {
         printf("ERROR: didn't read the correct number of bytes");
         fclose(f);
+        free(file_bytes);
         return NULL;
     } else {
         fclose(f);

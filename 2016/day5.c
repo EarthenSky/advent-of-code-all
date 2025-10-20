@@ -1,8 +1,9 @@
+#include <assert.h>
+#include <stdbool.h>
 #include <stdio.h> // sprintf()
 #include <stdlib.h> // exit()
-#include <string.h>
 #include <stdint.h>
-#include <stdbool.h>
+#include <string.h>
 
 const char* DOOR_ID = "ffykfhsq";
 
@@ -55,26 +56,26 @@ struct bits_128 md5(char* message) {
     size_t padding_size = 64 - expanded_message_size % 64;
     size_t new_message_size = expanded_message_size + padding_size;
     message[message_size + 0] = 0x80;
-    // TODO: can this fail?
     memset(message + 1 + message_size, 0x00, padding_size * sizeof(char));
     uint64_t *bits = (uint64_t *) &message[message_size + 1 + padding_size];
     *bits = message_size * 8;
 
+    // DEBUG:
     //for (size_t ci = 0; ci < new_message_size; ci++) {
     //    printf("[%llu] %c (%u)\n", ci, new_message[ci], new_message[ci]);
     //}
 
     // process the message in successive 512-bit chunks
     for (size_t message_i = 0; message_i < new_message_size; message_i += 64) {
-        // TODO: why cast here or in malloc?
-        uint32_t *M = (uint32_t *) &message[message_i];
+        // NOTE: since message_i increments in steps of 64 and message is 4 byte aligned,
+        // M will always be 4-byte aligned.
+        uint32_t *M = (uint32_t *) (message + message_i);
 
         uint32_t A = a0;
         uint32_t B = b0;
         uint32_t C = c0;
         uint32_t D = d0;
 
-        // Main loop:
         uint32_t F, g;
         for (size_t i = 0; i < 16; i++) {
             F = ((B & C) | (~B & D)) + A + K[i] + M[i];
@@ -84,7 +85,6 @@ struct bits_128 md5(char* message) {
 
             B += leftrotate(F, s[i]);
         }
-
         for (size_t i = 16; i < 32; i++) {
             F = ((D & B) | (~D & C)) + A + K[i] + M[(5*i + 1) % 16];
             A = D;
@@ -93,7 +93,6 @@ struct bits_128 md5(char* message) {
 
             B += leftrotate(F, s[i]);
         }
-
         for (size_t i = 32; i < 48; i++) {
             F = (B ^ C ^ D) + A + K[i] + M[(3*i + 5) % 16];
             A = D;
@@ -102,7 +101,6 @@ struct bits_128 md5(char* message) {
 
             B += leftrotate(F, s[i]);
         }
-
         for (size_t i = 48; i < 64; i++) {
             F = (C ^ (B | ~D)) + A + K[i] + M[(7*i) % 16];
             A = D;
@@ -136,24 +134,31 @@ struct bits_128 md5(char* message) {
     };
 }
 
+void md5__test() {
+    // small md5 sanify check!
+    assert(md5("The quick brown fox jumps over the lazy dog").bytes[0] == 0x9e);
+    assert(md5("The quick brown fox jumps over the lazy dog.").bytes[0] == 0xe4);
+    assert(md5("").bytes[0] == 0xd4);
+}
+
 void part1() {
     printf("part 1:\n");
 
     size_t password_i = 0;
-    // TODO: how does this initialization work, formally speaking?
-    char password[8+1] = { '\0' };
+    char password[8+1] = { 0 };
 
     const size_t MAX_CHARS_IN_U64 = 20;
-    char *to_hash_buffer = malloc((strlen(DOOR_ID) + MAX_CHARS_IN_U64) * sizeof(char) + 64);
+    size_t minimum_alloc_size = strlen(DOOR_ID) + MAX_CHARS_IN_U64 + 64;
+    // alligned alloc is required for portability, since md5 uses u32 semantics
+    char *to_hash_buffer = aligned_alloc(
+        sizeof(uint32_t),
+        // align the alloc size too
+        minimum_alloc_size + minimum_alloc_size % sizeof(uint32_t)
+    );
     if (to_hash_buffer == NULL) {
-        printf("ERROR: malloc failed\n");
-        exit(1);
+        fprintf(stderr, "ERROR: malloc() failed at %s:%d\n", __FILE__, __LINE__);
+        exit(EXIT_FAILURE);
     }
-
-    // TODO: structure this test nicely too
-    // small test for md5!
-    // printf("md5() = %x\n", md5("The quick brown fox jumps over the lazy dog").bytes[0]);
-    // exit(2);
 
     size_t i = 0;
     while (password_i < 8) {
@@ -189,12 +194,15 @@ void part2() {
     char password[8+1] = { '\0' };
 
     const size_t MAX_CHARS_IN_U64 = 20;
-    // extra 64 so that padding can be re-computed, etc. etc.
-
-    char *to_hash_buffer = malloc((strlen(DOOR_ID) + MAX_CHARS_IN_U64) * sizeof(char) + 64);
+    // extra 64 so that padding can be re-computed.
+    size_t minimum_alloc_size = strlen(DOOR_ID) + MAX_CHARS_IN_U64 + 64;
+    char *to_hash_buffer = aligned_alloc(
+        sizeof(uint32_t),
+        minimum_alloc_size + minimum_alloc_size % sizeof(uint32_t)
+    );
     if (to_hash_buffer == NULL) {
-        printf("ERROR: malloc failed\n");
-        exit(1);
+        fprintf(stderr, "ERROR: malloc() failed at %s:%d\n", __FILE__, __LINE__);
+        exit(EXIT_FAILURE);
     }
 
     size_t i = 0;
@@ -240,7 +248,8 @@ void part2() {
 }
 
 int main() {
+    md5__test();
     part1();
     part2();
-    return 0;
+    return EXIT_SUCCESS;
 }
