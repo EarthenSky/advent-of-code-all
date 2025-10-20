@@ -4,6 +4,8 @@
 
 #include <iso646.h>
 
+#include "../2015/helpers.h"
+
 #define NUM_LETTERS (26)
 
 size_t arg_max_histogram(uint32_t histogram[NUM_LETTERS]) {
@@ -61,7 +63,7 @@ void fold_lines_by(
     }
 }
 
-void part1(char *file_bytes, size_t num_bytes) {
+void part1(const char *file_bytes, size_t num_bytes) {
     // we expect all words are the same length, every newline is a single char,
     // and that there is no final newline.
     size_t message_length;
@@ -88,7 +90,7 @@ void part1(char *file_bytes, size_t num_bytes) {
     free(message);
 }
 
-void part2(char *file_bytes, size_t num_bytes) {
+void part2(const char *file_bytes, size_t num_bytes) {
     // we expect all words are the same length, every newline is a single char,
     // and that there is no final newline.
     size_t message_length;
@@ -116,28 +118,9 @@ void part2(char *file_bytes, size_t num_bytes) {
 }
 
 int main() {
-    // TODO: just use the helper, but clean it up first
-    FILE* f = fopen("input_day6.txt", "r");
-
-    fseek(f, 0, SEEK_END);
-    size_t num_bytes = ftell(f);
-    char *file_bytes = malloc((num_bytes+1) * sizeof *file_bytes);
-    if (file_bytes == NULL) {
-        fprintf(stderr, "ERROR: malloc() failed at %s:%d\n", __FILE__, __LINE__ - 2);
-        exit(EXIT_FAILURE);
-    }
-
-    fseek(f, 0, SEEK_SET);
-    size_t num_bytes_read = fread(file_bytes, sizeof *file_bytes, num_bytes, f);
-    if (num_bytes_read != num_bytes) {
-        fprintf(stderr, "ERROR: fread() failed to read enough bytes at %s:%d\n", __FILE__, __LINE__ - 2);
-        fclose(f);
-        exit(EXIT_FAILURE);
-    }
-    file_bytes[num_bytes] = '\0';
-    
-    part1(file_bytes, num_bytes);
-    part2(file_bytes, num_bytes);
-    free(file_bytes);
+    struct file_info fi = get_file_contents_and_size("./input_day6.txt");
+    part1(fi.file_bytes, fi.num_bytes);
+    part2(fi.file_bytes, fi.num_bytes);
+    free(fi.file_bytes);
     return EXIT_SUCCESS;
 }

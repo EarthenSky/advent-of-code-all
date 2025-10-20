@@ -4,6 +4,8 @@
 #include <stdint.h> // int32_t
 #include <stdbool.h> // true, false, bool 
 
+#include "../2015/helpers.h"
+
 void part1(const char *file_bytes, size_t num_bytes) {
     printf("part 1:\n");
 
@@ -126,42 +128,9 @@ void part2(const char *file_bytes, size_t num_bytes) {
 }
 
 int main() {
-    FILE* f = fopen("./input_day4.txt", "r");
-    if (f == NULL) {
-        perror("fopen() ERROR");
-        exit(EXIT_FAILURE);
-    }
-
-    if (fseek(f, 0, SEEK_END)) {
-        fprintf(stderr, "ERROR: fseek() failed at %s:%d\n", __FILE__, __LINE__ - 1);
-        fclose(f);
-        exit(EXIT_FAILURE);
-    }
-    size_t num_bytes = ftell(f);
-    char *file_bytes = malloc((num_bytes + 1) * sizeof(char));
-    if (file_bytes == NULL) {
-        fprintf(stderr, "ERROR: malloc() failed\n");
-        exit(EXIT_FAILURE);
-    }
-
-    if (fseek(f, 0, SEEK_SET)) {
-        fprintf(stderr, "ERROR: fseek() failed at %s:%d\n", __FILE__, __LINE__ - 1);
-        fclose(f);
-        exit(EXIT_FAILURE);
-    }
-    size_t num_bytes_read = fread(file_bytes, sizeof(char), num_bytes, f);
-    if (num_bytes_read != num_bytes) {
-        fprintf(stderr, "ERROR: fread() didn't get the correct number of bytes\n");
-        fclose(f);
-        free(file_bytes);
-        exit(EXIT_FAILURE);
-    } else {
-        fclose(f);
-        file_bytes[num_bytes] = '\0';
-    }
-
-    part1(file_bytes, num_bytes);
-    part2(file_bytes, num_bytes);
-    free(file_bytes);
+    struct file_info fi = get_file_contents_and_size("./input_day4.txt");
+    part1(fi.file_bytes, fi.num_bytes);
+    part2(fi.file_bytes, fi.num_bytes);
+    free(fi.file_bytes);
     return EXIT_SUCCESS;
 }
