@@ -84,6 +84,10 @@ static struct file_info get_file_contents_and_size(const char *filename) {
     }
 }
 
+void free_file_info(struct file_info fi) {
+    free(fi.file_bytes);
+}
+
 /// @brief these don't exist in math.h !
 static inline int min(int a, int b) { return a < b ? a : b; }
 /// @brief these don't exist in math.h !
