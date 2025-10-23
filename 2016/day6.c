@@ -4,7 +4,7 @@
 
 #include <iso646.h>
 
-#include "../2015/helpers.h"
+#include "../geblib_c/io.h"
 
 #define NUM_LETTERS (26)
 
@@ -118,9 +118,9 @@ void part2(const char *file_bytes, size_t num_bytes) {
 }
 
 int main() {
-    struct file_info fi = get_file_contents_and_size("./input_day6.txt");
+    struct file_info fi = get_file_contents("./input_day6.txt");
     part1(fi.file_bytes, fi.num_bytes);
     part2(fi.file_bytes, fi.num_bytes);
-    free(fi.file_bytes);
+    free_file_info(fi);
     return EXIT_SUCCESS;
 }

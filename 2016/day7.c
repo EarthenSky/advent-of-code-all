@@ -7,7 +7,7 @@
 
 #include <iso646.h>
 
-#include "../2015/helpers.h"
+#include "../geblib_c/io.h"
 
 void part1(const struct file_info *fi) {
     printf("part 1:\n");
@@ -168,8 +168,9 @@ void part2(const struct file_info *fi) {
 }
 
 int main() {
-    struct file_info fi = get_file_contents_and_size("./input_day7.txt");
+    struct file_info fi = get_file_contents("./input_day7.txt");
     part1(&fi);
     part2(&fi);
+    free_file_info(fi);
     return EXIT_SUCCESS;
 }

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../2015/helpers.h"
+#include "../geblib_c/io.h"
 
 #define SCREEN_HEIGHT (6)
 #define SCREEN_WIDTH (50)
@@ -85,7 +85,7 @@ void both_parts(const struct file_info * const fi) {
 }
 
 int main() {
-    struct file_info fi = get_file_contents_and_size("./input_day8.txt");
+    struct file_info fi = get_file_contents("./input_day8.txt");
     both_parts(&fi);
 
     free_file_info(fi);

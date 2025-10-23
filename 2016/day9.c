@@ -6,42 +6,7 @@
 
 #include <sys/types.h>
 
-#include "../2015/helpers.h"
-
-// TODO: move this into its own file so I don't have to keep re-implementing it
-// TODO: also make it generic to type using macros
-struct char_vector {
-    char *data;
-    size_t size;
-    size_t capacity;
-};
-struct char_vector char_vector__create(size_t initial_capacity) {
-    if (initial_capacity == 0) {
-        fprintf(stderr, "ERROR: cannot create empty vector\n");
-        exit(EXIT_FAILURE);
-    }
-    return (struct char_vector) {
-        .data = malloc(initial_capacity * sizeof(char)),
-        .size = 0,
-        .capacity = initial_capacity
-    };
-}
-void char_vector__add(struct char_vector vec, char ch) {
-    if (vec.size == vec.capacity) {
-        vec.data = realloc(vec.data, vec.capacity * 2);
-        vec.capacity *= 2;
-        if (vec.data == NULL) {
-            fprintf(stderr, "ERROR: malloc() failed");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    vec.data[vec.size] = ch;
-    vec.size += 1;
-}
-void char_vector__free(struct char_vector vec) {
-    free(vec.data);
-}
+#include "../geblib_c/io.h"
 
 void part1(const struct file_info *const fi) {
     printf("part 1:\n");
@@ -113,7 +78,7 @@ void part2(const struct file_info *const fi) {
 }
 
 int main() {
-    struct file_info fi = get_file_contents_and_size("./input_day9.txt");
+    struct file_info fi = get_file_contents("./input_day9.txt");
     part1(&fi);
     part2(&fi);
 
