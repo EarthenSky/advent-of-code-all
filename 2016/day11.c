@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "../geblib_c/vector.h"
+#include "../geblib_c/queue.h"
+#include "../geblib_c/hashset.h"
 
-#define NUM_ITEMS (5)
+#define NUM_ITEMS (7)
 #define NO_ELEMENT (-1)
 
 typedef struct item {
@@ -19,7 +20,8 @@ typedef struct search_node {
     size_t steps;
 } search_node_t;
 
-DEFINE_VECTOR(search_node_t)
+DEFINE_QUEUE(search_node_t)
+DEFINE_HASHSET(search_node_t)
 
 bool is_fried(const item_t *const items) {
     for (size_t i = 0; i < NUM_ITEMS; i++) {
@@ -47,7 +49,7 @@ bool is_solution(const item_t *const items) {
 
 void add_frontier_node(
     const search_node_t *parent_node,
-    VECTOR_TYPE(search_node_t) *frontier,
+    QUEUE_TYPE(search_node_t) *frontier,
     int generator_i,
     int generator_j,
     int chip_i,
@@ -68,12 +70,12 @@ void add_frontier_node(
     new_node.elevator = parent_node->elevator + elevator_diff;
     new_node.steps = parent_node->steps + 1;
     // BFS !
-    VECTOR_INSERT(search_node_t, frontier, 0, new_node);
+    QUEUE_PUSH(search_node_t, frontier, new_node);
 }
 
 void add_frontier_nodes_in_direction(
     const search_node_t *parent_node,
-    VECTOR_TYPE(search_node_t) *frontier,
+    QUEUE_TYPE(search_node_t) *frontier,
     int elevator_diff
 ) {
     const item_t *items = parent_node->state;
@@ -164,41 +166,40 @@ void add_frontier_nodes_in_direction(
     }
 }
 
-bool mostly_equal(const search_node_t *a, const search_node_t *b) {
-    if (a->elevator != b->elevator)
+// Ignores number of steps, because we traverse items in order of fewest steps first.
+// If all else is equal, steps must be larger, so we can ignore it.
+bool mostly_equal(const search_node_t *new_node, const search_node_t *existing) {
+    if (new_node->elevator != existing->elevator)
         return false;
 
     for (size_t i = 0; i < NUM_ITEMS; i++) {
-        if (a->state[i].chip_layer != b->state[i].chip_layer)
+        if (new_node->state[i].chip_layer != existing->state[i].chip_layer)
             return false;
-        else if (a->state[i].generator_layer != b->state[i].generator_layer)
+        else if (new_node->state[i].generator_layer != existing->state[i].generator_layer)
             return false;
     }
 
     return true;
 }
 
-bool already_visited(const VECTOR_TYPE(search_node_t) *vec, const search_node_t *node) {
-    for (size_t i = 0; i < vec->size; i++) {
-        // if there's a node we've already visited, but it's smaller then take it!
-        if (mostly_equal(&vec->data[i], node) && node->steps >= vec->data[i].steps)
-            return true;
+// We ignore the string name and the nuber of steps
+size_t hash_search_node_t(const search_node_t *node) {
+    size_t hash = (node->elevator * 33);
+    for (size_t i = 0; i < NUM_ITEMS; i++) {
+        hash = (hash * 37) ^ node->state[i].chip_layer;
+        hash = (hash * 31) ^ node->state[i].generator_layer;
     }
-
-    return false;
+    return hash;
 }
 
-void part1() {
-    printf("part 1:\n");
-
-    /*
-    item_t items[NUM_ITEMS] = {
-        (item_t) { .name = "hydrogen", .generator_layer = 1, .chip_layer = 0 },
-        (item_t) { .name = "lithium", .generator_layer = 2, .chip_layer = 0 },
-    };
-    */
+// TODO: hash-based priority queue is needed, plus an A* function... hmmm
+void part2() {
+    printf("part 2:\n");
 
     item_t items[NUM_ITEMS] = {
+        (item_t) { .name = "elerium", .generator_layer = 0, .chip_layer = 0 },
+        (item_t) { .name = "dilithium", .generator_layer = 0, .chip_layer = 0 },
+        // before
         (item_t) { .name = "promethium", .generator_layer = 0, .chip_layer = 0 },
         (item_t) { .name = "cobalt", .generator_layer = 1, .chip_layer = 2 },
         (item_t) { .name = "curium", .generator_layer = 1, .chip_layer = 2 },
@@ -206,27 +207,25 @@ void part1() {
         (item_t) { .name = "plutonium", .generator_layer = 1, .chip_layer = 2 },
     };
 
-    // TODO: make visited into a hashmap
-    VECTOR_TYPE(search_node_t) visited = VECTOR_CREATE(search_node_t, 1000);
-    VECTOR_TYPE(search_node_t) frontier = VECTOR_CREATE(search_node_t, 1000);
+    HASHSET_TYPE(search_node_t) visited = HASHSET_CREATE(search_node_t, 1000, hash_search_node_t, mostly_equal);
+    QUEUE_TYPE(search_node_t) frontier = QUEUE_CREATE(search_node_t, 1000);
     search_node_t initial_node;
     memcpy(initial_node.state, items, sizeof items);
     initial_node.elevator = 0;
     initial_node.steps = 0;
-    VECTOR_ADD(search_node_t, &frontier, initial_node);
+    QUEUE_PUSH(search_node_t, &frontier, initial_node);
 
-    // TODO: for BFS, use a queue, not a vector
     size_t smallest_solution = 1024 * 1024;
     size_t num_processed = 0;
-    while (frontier.size != 0) {
-        search_node_t node = VECTOR_POP(search_node_t, &frontier);
+    while (QUEUE_SIZE(search_node_t, &frontier) != 0) {
+        search_node_t node = QUEUE_POP(search_node_t, &frontier);
         if (is_fried(node.state)) {
             continue;
-        } else if (already_visited(&visited, &node)) {
+        } else if (HASHSET_CONTAINS(search_node_t, &visited, &node)) {
             continue;
-        } 
-        
-        VECTOR_ADD(search_node_t, &visited, node);
+        }
+
+        HASHSET_INSERT(search_node_t, &visited, &node);
         if (is_solution(node.state)) {
             if (node.steps < smallest_solution)
                 smallest_solution = node.steps;
@@ -242,8 +241,11 @@ void part1() {
         if (node.elevator != 3)
             add_frontier_nodes_in_direction(&node, &frontier, 1);
 
-        if (num_processed % 1000 == 0)
-            printf("frontier size = %zu (steps = %zu) (num_processed = %zu)\n", frontier.size, node.steps, num_processed);
+        //if (num_processed % 50000 == 0)
+        //    printf(
+        //        "frontier size = %zu (steps = %zu) (num_processed = %zu)\n",
+        //        QUEUE_SIZE(search_node_t, &frontier), node.steps, num_processed
+        //    );
 
         num_processed += 1;
     }
@@ -251,10 +253,15 @@ void part1() {
     // 53 is wrong...
     // 28 is wrong...
     // 33 is correct -> it took 7 minutes but I am tired so I don't care
+    // got it down to 2 minutes, woohoo!
+    // now part 2 is killing me aaaaa
+    // down to 12 seconds for part 2 hash maps are awesome!!!
     printf("smallest_solution = %zu\n", smallest_solution);
 }
 
 int main() {
-    part1();
+    // NOTE: no part1 because I don't feel like it and I wish local constants
+    // could initialize static arrays or smth...
+    part2();
     return EXIT_SUCCESS;
 }
