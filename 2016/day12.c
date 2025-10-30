@@ -6,12 +6,12 @@
 
 #include "../geblib_c/io.h"
 
-enum argument_tag {
-    REG = 0,
-    VALUE
-};
 struct argument {
-    enum argument_tag tag;
+    // anonymous enum is in the file scope because structs don't have scope
+    enum {
+        REG = 0,
+        VALUE
+    } tag;
     // anonymous union to the rescue!
     union {
         uint8_t reg_i;

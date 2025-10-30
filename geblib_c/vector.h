@@ -66,7 +66,7 @@ void type_vector__insert(struct type_vector *vec, size_t i, type x) {\
     memmove(vec->data+i+1, vec->data+i, (vec->size - i) * sizeof(type));\
     vec->data[i] = x;\
     vec->size += 1;\
-}\
+}
 
 #define VECTOR_TYPE(type) struct type_vector
 #define VECTOR_CREATE(type, initial_capacity) type_vector__create(initial_capacity)

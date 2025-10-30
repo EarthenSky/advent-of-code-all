@@ -26,9 +26,17 @@ struct type_hashset type_hashset__create(\
         fprintf(stderr, "ERROR: cannot create empty hashset\n");\
         exit(EXIT_FAILURE);\
     }\
+    struct type_hashset__item *data = calloc(\
+        initial_capacity,\
+        sizeof(struct type_hashset__item)\
+    );\
+    if (data == NULL) {\
+        fprintf(stderr, "ERROR: type_hashset__insert:malloc() failed");\
+        exit(EXIT_FAILURE);\
+    }\
     return (struct type_hashset) {\
-        .data = malloc(initial_capacity * sizeof(struct type_hashset__item)),\
-        .size = initial_capacity,\
+        .data = data,\
+        .size = 0,\
         .capacity = initial_capacity,\
         .hash_function = hash_function,\
         .equality_function = equality_function\
