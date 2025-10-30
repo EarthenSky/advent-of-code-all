@@ -25,7 +25,7 @@ static struct file_info get_file_contents(const char *filename) {
         fclose(f);
         return fi;
     }
-    // TODO: use errno
+    // TODO: use errno to hit the ftell failure condition
     fi.num_bytes = ftell(f);
     fi.file_bytes = malloc(fi.num_bytes+1);
     if (fi.file_bytes == NULL) {

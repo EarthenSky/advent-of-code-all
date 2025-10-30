@@ -51,6 +51,24 @@ type type_queue__pop(struct type_queue *q) {\
     q->start_i = (q->start_i + 1) % q->capacity;\
     return result;\
 }\
+type type_queue__peek(const struct type_queue *q, size_t i) {\
+    size_t target_i = (q->start_i + i) % q->capacity;\
+    if (\
+        q->start_i <= q->end_i\
+        && (target_i < q->start_i || target_i >= q->end_i)\
+    ) {\
+        fprintf(stderr, "ERROR: index outside range\n");\
+        exit(EXIT_FAILURE);\
+    } else if (\
+        q->start_i > q->end_i\
+        && target_i < q->start_i\
+        && target_i >= q->end_i\
+    ) {\
+        fprintf(stderr, "ERROR: index outside range\n");\
+        exit(EXIT_FAILURE);\
+    }\
+    return q->data[target_i];\
+}\
 void type_queue__free(struct type_queue *q) {\
     if (q->data != NULL)\
         free(q->data);\
@@ -66,6 +84,7 @@ size_t type_queue__size(const struct type_queue *q) {\
 #define QUEUE_CREATE(type, initial_capacity) type_queue__create(initial_capacity)
 #define QUEUE_PUSH(type, q, x) type_queue__push(q, x)
 #define QUEUE_POP(type, q) type_queue__pop(q)
+#define QUEUE_PEEK(type, q, i) type_queue__peek(q, i)
 #define QUEUE_FREE(type, q) type_queue__free(q)
 #define QUEUE_SIZE(type, q) type_queue__size(q)
 
