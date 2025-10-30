@@ -53,7 +53,47 @@ struct argument arg_from_str(const char *s) {
     }
 }
 
-void part1(const struct file_info* fi) {
+/// @param reg out
+void evaluate_program(int64_t reg[4], instruction_t instructions[], size_t num_instructions) {
+    int64_t iptr = 0;
+
+    while (iptr >= 0 && iptr < num_instructions) {
+        instruction_t current = instructions[iptr];
+        switch (current.tag) {
+            case CPY:
+                if (current.cpy.a.tag == REG)
+                    reg[current.cpy.b.reg_i] = reg[current.cpy.a.reg_i];
+                else
+                    reg[current.cpy.b.reg_i] = current.cpy.a.value;
+                iptr += 1;
+                continue;
+            case INC:
+                reg[current.inc.reg_i] += 1;
+                iptr += 1;
+                continue;
+            case DEC:
+                reg[current.dec.reg_i] -= 1;
+                iptr += 1;
+                continue;
+            case JNZ:
+                bool a_is_zero = (
+                    current.cpy.a.tag == REG
+                    ? reg[current.jnz.a.reg_i]
+                    : current.jnz.a.value
+                ) == 0;
+                if (!a_is_zero && current.cpy.b.tag == REG)
+                    iptr += reg[current.cpy.b.reg_i];
+                else if (!a_is_zero && current.cpy.b.tag == VALUE)
+                    iptr += current.cpy.b.value;
+                else
+                    iptr += 1;
+                continue;
+        }
+    }
+
+}
+
+void both_parts(const struct file_info* fi) {
     printf("part 1:\n");
 
     size_t num_instructions = 0;
@@ -119,51 +159,21 @@ void part1(const struct file_info* fi) {
         ch_i += tokens_consumed;
     }
 
-    // evaluate the program
+    int64_t reg[4] = {};
+    evaluate_program(reg, instructions, num_instructions);
+    printf("a contains %lld\n", reg[0]);
+    
+    printf("part 2:\n");
 
-    int64_t iptr = 0;
-    int64_t reg[4];
-
-    while (iptr >= 0 && iptr < num_instructions) {
-        instruction_t current = instructions[iptr];
-        switch (current.tag) {
-            case CPY:
-                if (current.cpy.a.tag == REG)
-                    reg[current.cpy.b.reg_i] = reg[current.cpy.a.reg_i];
-                else
-                    reg[current.cpy.b.reg_i] = current.cpy.a.value;
-                iptr += 1;
-                continue;
-            case INC:
-                reg[current.inc.reg_i] += 1;
-                iptr += 1;
-                continue;
-            case DEC:
-                reg[current.dec.reg_i] -= 1;
-                iptr += 1;
-                continue;
-            case JNZ:
-                bool a_is_zero = (
-                    current.cpy.a.tag == REG
-                    ? reg[current.jnz.a.reg_i]
-                    : current.jnz.a.value
-                ) == 0;
-                if (!a_is_zero && current.cpy.b.tag == REG)
-                    iptr += reg[current.cpy.b.reg_i];
-                else if (!a_is_zero && current.cpy.b.tag == VALUE)
-                    iptr += current.cpy.b.value;
-                else
-                    iptr += 1;
-                continue;
-        }
-    }
+    memcpy(reg, (int64_t[4]) { 0, 0, 1, 0 }, sizeof reg);
+    evaluate_program(reg, instructions, num_instructions);
 
     printf("a contains %lld\n", reg[0]);
 }
 
 int main() {
     struct file_info fi = get_file_contents("./input_day12.txt");
-    part1(&fi);
+    both_parts(&fi);
 
     free_file_info(fi);
     return EXIT_SUCCESS;
