@@ -148,7 +148,7 @@ void part1() {
     char password[8+1] = { 0 };
 
     const size_t MAX_CHARS_IN_U64 = 20;
-    size_t minimum_alloc_size = strlen(DOOR_ID) + MAX_CHARS_IN_U64 + 64;
+    size_t minimum_alloc_size = strnlen(DOOR_ID, 9) + MAX_CHARS_IN_U64 + 64;
     // alligned alloc is required for portability, since md5 uses u32 semantics
     char *to_hash_buffer = aligned_alloc(
         sizeof(uint32_t),
@@ -195,7 +195,7 @@ void part2() {
 
     const size_t MAX_CHARS_IN_U64 = 20;
     // extra 64 so that padding can be re-computed.
-    size_t minimum_alloc_size = strlen(DOOR_ID) + MAX_CHARS_IN_U64 + 64;
+    size_t minimum_alloc_size = strnlen(DOOR_ID, 9) + MAX_CHARS_IN_U64 + 64;
     char *to_hash_buffer = aligned_alloc(
         sizeof(uint32_t),
         minimum_alloc_size + minimum_alloc_size % sizeof(uint32_t)
