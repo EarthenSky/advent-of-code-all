@@ -82,6 +82,7 @@ size_t type_queue__size(const struct type_queue *q) {\
 
 #define QUEUE_TYPE(type) struct type_queue
 #define QUEUE_CREATE(type, initial_capacity) type_queue__create(initial_capacity)
+// TODO: make this a pointer to be consistent w/ the other ADTs
 #define QUEUE_PUSH(type, q, x) type_queue__push(q, x)
 #define QUEUE_POP(type, q) type_queue__pop(q)
 #define QUEUE_PEEK(type, q, i) type_queue__peek(q, i)

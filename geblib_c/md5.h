@@ -18,7 +18,7 @@ uint32_t leftrotate(uint32_t x, uint32_t rotate_amount) {
 }
 
 /// @brief this algorithm is derived from https://en.wikipedia.org/wiki/MD5
-struct bits_128 md5_inplace(char* message) {
+struct bits_128 md5_inplace(char* message, size_t message_size_bytes) {
     uint32_t s[64] = {
         // per-round shifts
         7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
@@ -51,19 +51,21 @@ struct bits_128 md5_inplace(char* message) {
     uint32_t c0 = 0x98badcfe;
     uint32_t d0 = 0x10325476;
 
-    size_t message_size = strlen(message);
+    // size_t message_size = strlen(message);
+    // printf("0 message_size = %zu", message_size);
+
     // add the byte 0x80, pad with zeros until 448, then add the length
-    size_t expanded_message_size = message_size + 1 + 8;
+    size_t expanded_message_size = message_size_bytes + 1 + 8;
     size_t padding_size = 64 - expanded_message_size % 64;
     size_t new_message_size = expanded_message_size + padding_size;
-    message[message_size + 0] = 0x80;
-    memset(message + 1 + message_size, 0x00, padding_size * sizeof(char));
-    uint64_t *bits = (uint64_t *) &message[message_size + 1 + padding_size];
-    *bits = message_size * 8;
+    message[message_size_bytes + 0] = 0x80;
+    memset(message + 1 + message_size_bytes, 0x00, padding_size * sizeof(char));
+    uint64_t *bits = (uint64_t *) &message[message_size_bytes + 1 + padding_size];
+    *bits = message_size_bytes * 8;
 
     // DEBUG:
     //for (size_t ci = 0; ci < new_message_size; ci++) {
-    //    printf("[%llu] %c (%hhu)\n", ci, message[ci], message[ci]);
+    //    printf("[%llu] %c (%hhu) {%hhx}\n", ci, message[ci], message[ci], message[ci]);
     //}
 
     // process the message in successive 512-bit chunks
