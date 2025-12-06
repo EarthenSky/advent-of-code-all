@@ -40,7 +40,7 @@ int main() {
         } else if (ch == 'L') {
             // degrees can be arbitrarily large, so we add 100 to avoid accidental overflow
             dial_after_turn = (dial + 100 - excess_degrees) % 100;
-            if (dial != 0 && dial_after_turn > dial)
+            if (dial != 0 && (dial_after_turn > dial || dial_after_turn == 0))
                 num_turns_over_zero += 1;
         } else {
             fprintf(stderr, "ERROR: got invalid char");
@@ -54,6 +54,7 @@ int main() {
 
     printf("(part1) num_zeros = %zd\n", num_zeros);
     // < 6765
+    // > 6225
     // > 5688
     printf("(part2) num_turns_over_zero = %zd\n", num_turns_over_zero);
 

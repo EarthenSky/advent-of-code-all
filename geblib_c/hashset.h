@@ -54,7 +54,7 @@ size_t type_hashset__follow_chain(const struct type_hashset *hs, const type *x) 
 \
         offset += 1;\
     }\
-    return hash + offset;\
+    return (hash + offset) % hs->capacity;\
 }\
 /* returns true if inserted a new element, false if it already existed. */\
 bool type_hashset__insert(struct type_hashset *hs, const type *x) {\
