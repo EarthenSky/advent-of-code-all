@@ -8,6 +8,7 @@
 
 #include "../geblib_c/io.h"
 #include "../geblib_c/hashset.h"
+#include "../geblib_c/math.h"
 
 DEFINE_HASHSET(size_t)
 
@@ -15,13 +16,6 @@ struct range_t {
     size_t start;
     size_t end;
 };
-
-size_t z_pow10(size_t x) {
-    size_t result = 1;
-    for (size_t i = 0; i < x; i++)
-        result *= 10;
-    return result;
-}
 
 size_t num_digits(size_t x) {
     char buffer[64];
