@@ -137,7 +137,7 @@ int main() {
         size_t a, b;
         size_t num_chars = 0;
 
-        int num_matches = sscanf(fi.file_bytes + ch_i, "%zu - %zu%n", &a, &b, &num_chars);
+        int num_matches = sscanf(fi.file_bytes + ch_i, "%zu - %zu%zn", &a, &b, &num_chars);
 
         // + 1 skips the trailing comma
         ch_i += num_chars + 1;
