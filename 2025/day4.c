@@ -10,7 +10,7 @@ const char NONE = '.';
 
 // TODO: the code is better if map is padded
 // TODO: benchmark it
-// TODO: how to measure cycles?
+// TODO: how to measure cycles? -> look into rdtsc!
 // TODO: would be a fun short blog post!
 size_t num_adjacent_rolls(const char* map, size_t height, size_t width, size_t x, size_t y) {
     size_t num = 0;
