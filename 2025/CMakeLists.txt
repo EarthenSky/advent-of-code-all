@@ -19,5 +19,6 @@ add_executable(day2 day2.c)
 # target_link_libraries(day2 m) # only for unix
 add_executable(day3 day3.c)
 add_executable(day4 day4.c)
+add_executable(day5 day5.c)
 
 # ------------------------------------------------ #
