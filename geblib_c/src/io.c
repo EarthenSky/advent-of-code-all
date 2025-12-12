@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-// TODO: can cmake figure out where my include directory is? It should... right?
 #include "geblib/io.h"
 
 struct file_info get_file_contents(const char *filename) {
