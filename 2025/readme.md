@@ -3,9 +3,10 @@
 ## C99
 - these programs are written in c99, supporting GNU extensions
 - install gcc & cmake
+- go to root of git repo
 - `cmake -S . -B build`
 - `cmake --build build`
-- `time ./build/day1` for example
+- `time ./build/2025/day1` for example
 
 ## Fil-C
 
