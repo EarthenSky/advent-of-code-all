@@ -6,9 +6,9 @@
 
 // #include <math.h>
 
-#include "../geblib_c/io.h"
-#include "../geblib_c/hashset.h"
-#include "../geblib_c/math.h"
+#include "geblib/io.h"
+#include "geblib/hashset.h"
+#include "geblib/math.h"
 
 DEFINE_HASHSET(size_t)
 

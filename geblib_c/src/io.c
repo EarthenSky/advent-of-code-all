@@ -1,17 +1,9 @@
-#ifndef GEBLIB_IO_H
-#define GEBLIB_IO_H
-
 #include <stdio.h>
-#include <stdlib.h>
 
-struct file_info {
-    char *file_bytes;
-    // not including the null terminator
-    size_t num_bytes;
-};
+// TODO: can cmake figure out where my include directory is? It should... right?
+#include "geblib/io.h"
 
-/// @brief you must free fi.file_bytes, unless num_bytes is 0
-static struct file_info get_file_contents(const char *filename) {
+struct file_info get_file_contents(const char *filename) {
     struct file_info fi = { .file_bytes = 0, .num_bytes = 0 };
     
     FILE *f = fopen(filename, "r");
@@ -61,5 +53,3 @@ static struct file_info get_file_contents(const char *filename) {
 void free_file_info(struct file_info fi) {
     free(fi.file_bytes);
 }
-
-#endif

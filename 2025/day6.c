@@ -5,8 +5,8 @@
 
 #include <ctype.h> // isdigit
 
-#include "../geblib_c/io.h"
-#include "../geblib_c/vector.h"
+#include "geblib/io.h"
+#include "geblib/vector.h"
 
 DEFINE_VECTOR(size_t)
 DEFINE_VECTOR(char)
@@ -37,7 +37,7 @@ int main() {
         while (true) {
             char c;
             size_t num_chars;
-            size_t num_captures = sscanf(fi.file_bytes + ch_i, "%c %zn", &c, &num_chars);
+            int num_captures = sscanf(fi.file_bytes + ch_i, "%c %zn", &c, &num_chars);
             if (num_captures == EOF) {
                 break;
             } else if (num_captures != 1) {

@@ -5,8 +5,8 @@
 
 #include <assert.h>
 
-#include "../geblib_c/io.h"
-#include "../geblib_c/math.h"
+#include "geblib/io.h"
+#include "geblib/math.h"
 
 unsigned int uofc(char ch) {
     return (ch - '0');
@@ -81,7 +81,7 @@ int main() {
     size_t ch_i = 0;
     while (ch_i < fi.num_bytes) {
         size_t bank_size, num_chars;
-        size_t num_captures = sscanf(fi.file_bytes + ch_i, "%*s%zn %zn", &bank_size, &num_chars);
+        int num_captures = sscanf(fi.file_bytes + ch_i, "%*s%zn %zn", &bank_size, &num_chars);
         if (num_captures == EOF)
             break;
 

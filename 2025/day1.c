@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "../geblib_c/io.h"
+#include "geblib/io.h"
 
 int main() {
     struct file_info fi = get_file_contents("./input_day1.txt");

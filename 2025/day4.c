@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "../geblib_c/io.h"
+#include "geblib/io.h"
 
 const char ROLL = '@';
 const char NONE = '.';

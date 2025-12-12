@@ -5,9 +5,9 @@
 
 #include <assert.h>
 
-#include "../geblib_c/io.h"
-#include "../geblib_c/math.h" // zmin, zmax
-#include "../geblib_c/vector.h"
+#include "geblib/io.h"
+#include "geblib/math.h" // zmin, zmax
+#include "geblib/vector.h"
 
 #define CHECK_PRECONDITIONS
 
