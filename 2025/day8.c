@@ -56,7 +56,22 @@ bool in_group(const struct junction_box *head, const struct junction_box *b) {
         running = running->same_group_child;
     }
 }
-size_t flood_fill(size_t start, struct junction_box *box_list) {
+size_t length(struct junction_box *start) {
+    size_t num_items = 0;
+
+    struct junction_box *running = start; // head_of_group(box_list + start);
+    while (true) {
+        // TODO: change `used` into `visited`
+        num_items += 1;
+
+        // TODO: assert no cycles exist at the head of this function
+        if (running->same_group_child == NULL)
+            return num_items;
+
+        running = running->same_group_child;
+    } 
+}
+size_t mut_flood_fill(size_t start, struct junction_box *box_list) {
     size_t num_items = 0;
 
     struct junction_box *running = head_of_group(box_list + start);
@@ -93,6 +108,13 @@ double box_pair__distance(size_t i, size_t j, const struct junction_box* const b
         + (z1 - z2) * (z1 - z2)
     );
 }
+int box_pair_comp_asc(const void *a, const void *b) {
+    size_t adist = ((const struct box_pair*)a)->distance;
+    size_t bdist = ((const struct box_pair*)b)->distance;
+    if (adist > bdist) return 1;
+    else if (adist < bdist) return -1;
+    else return 0;
+}
 
 // TODO: move this to a sorting lib or something
 // TODO: could I implement rust's default eq system or something using macros, or is it too hard?
@@ -105,6 +127,30 @@ int size_t_comp_asc(const void *x, const void *y) {
 }
 int size_t_comp_desc(const void *x, const void *y) {
     return -size_t_comp_asc(x, y);
+}
+
+void connect_boxes(struct junction_box* box_list, size_t i, size_t j) {
+    // printf("i = %zu (%zu, %zu)\n", i, pair_list[i].i, pair_list[i].j);
+    struct junction_box *i_box = box_list + i;
+    struct junction_box *j_box = box_list + j;
+
+    const struct junction_box *i_head = head_of_group(i_box);
+    struct junction_box *j_head = head_of_group(j_box);
+    // if they are in the same group, don't worry and ignore them
+    if (in_group(i_head, j_box) || in_group(j_head, i_box))
+        return;
+
+    // TODO: would a linked list class help here? Not sure if it would make code cleaner... hopefully so?
+    // connect groups by connecting lists
+    struct junction_box *i_tail = tail_of_group(i_box);
+    i_tail->same_group_child = j_head;
+    j_head->same_group_parent = i_tail;
+}
+
+// part2:
+
+bool all_boxes_connected(size_t num_boxes, struct junction_box* box_list) {
+    return length(head_of_group(box_list + 0)) == num_boxes;
 }
 
 int main() {
@@ -146,6 +192,8 @@ int main() {
         };
         box_list_i += 1;
     }
+
+    free_file_info(fi);
     
     // add NUM_PAIRS connections
     {
@@ -169,6 +217,7 @@ int main() {
                     .distance = box_pair__distance(i, j, box_list),
                 };
 
+                // a lame partial insertion sort
                 size_t insert_before_loc;
                 for (insert_before_loc = pair_list_i; insert_before_loc > 0; insert_before_loc--) {
                     //printf("\t\t [%zu] %f >= %f\n", insert_before_loc, current.distance, pair_list[insert_before_loc-1].distance);
@@ -176,7 +225,7 @@ int main() {
                         break;
                 }
   
-                if (insert_before_loc >= num_lines) {
+                if (insert_before_loc >= NUM_PAIRS) {
                     continue;
                 } else if (insert_before_loc == pair_list_i) {
                     pair_list[insert_before_loc] = current;
@@ -203,28 +252,11 @@ int main() {
 
         // add connections using our list of smallest
         assert(pair_list_i == NUM_PAIRS);
-        for (size_t i = 0; i < NUM_PAIRS; i++) {
-            //printf("i = %zu (%zu, %zu)\n", i, pair_list[i].i, pair_list[i].j);
-            struct junction_box *i_box = box_list + pair_list[i].i;
-            struct junction_box *j_box = box_list + pair_list[i].j;
-
-            const struct junction_box *i_head = head_of_group(i_box);
-            struct junction_box *j_head = head_of_group(j_box);
-            // if they are in the same group, don't worry and ignore them
-            if (in_group(i_head, j_box) || in_group(j_head, i_box))
-                continue;
-
-            // TODO: would a linked list class help here? Not sure if it would make code cleaner... hopefully so?
-            // connect groups by connecting lists
-            struct junction_box *i_tail = tail_of_group(i_box);
-            i_tail->same_group_child = j_head;
-            j_head->same_group_parent = i_tail;
-        }
+        for (size_t i = 0; i < NUM_PAIRS; i++)
+            connect_boxes(box_list, pair_list[i].i, pair_list[i].j);
 
         free(pair_list);
     }
-
-    printf("floodfill\n");
 
     // finally, do a flood fill search
     {
@@ -233,7 +265,7 @@ int main() {
         for (size_t i = 0; i < num_lines; i++) {
             if (box_list[i].used)
                 continue;
-            circuit_sizes[circuit_sizes_i] = flood_fill(i, box_list);
+            circuit_sizes[circuit_sizes_i] = mut_flood_fill(i, box_list);
             circuit_sizes_i += 1;
         }
 
@@ -244,7 +276,50 @@ int main() {
         free(circuit_sizes);
     }
     
+    // make and sort all pairs
+    {
+        // TODO: make an array ADT to simplify this
+        size_t pair_list_size = 0;
+        struct box_pair* const pair_list = malloc((num_lines * (num_lines-1))/2 * sizeof(*pair_list));
+        if (pair_list == NULL) {
+            exit(EXIT_FAILURE);
+        }
+
+        // create an item for each pair
+        for (size_t i = 0; i < num_lines; i++) {
+            for (size_t j = 0; j < num_lines; j++) {
+                if (i >= j)
+                    continue;
+
+                pair_list[pair_list_size] = (struct box_pair) {
+                    .i = i,
+                    .j = j,
+                    .distance = box_pair__distance(i, j, box_list),
+                };
+                pair_list_size += 1;
+            }
+        }
+
+        // on the scale of ~7 million ops
+        qsort(pair_list, pair_list_size, sizeof(*pair_list), box_pair_comp_asc);
+
+        // TODO: assert that the number of components is not already 1
+
+        // add connections, checking each time whether we're done or not
+        for (size_t i = 0; i < pair_list_size; i++) {
+            connect_boxes(box_list, pair_list[i].i, pair_list[i].j);
+
+            if (all_boxes_connected(num_lines, box_list)) {
+                printf("(part2) last x coord product = %zu\n", box_list[pair_list[i].i].x * box_list[pair_list[i].j].x);
+                free(pair_list);
+                free(box_list);
+                return EXIT_SUCCESS;
+            }
+        }
+
+        free(pair_list);
+    }
+
     free(box_list);
-    free_file_info(fi);
     return EXIT_FAILURE;
 }
