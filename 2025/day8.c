@@ -9,15 +9,7 @@
 #include <math.h>
 
 #include "geblib/io.h"
-
-// TODO: move this to a custom string library
-size_t count_occurences(const char* str, size_t len, char ch) {
-    size_t total = 0;
-    for (size_t i = 0; i < len; i++)
-        if (str[i] == ch)
-            total += 1;
-    return total;
-}
+#include "geblib/string.h"
 
 // network groups are formed from linked lists, because it minimizes allocations
 struct junction_box {

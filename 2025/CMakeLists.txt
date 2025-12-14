@@ -1,4 +1,4 @@
-set(DAYS day1 day2 day3 day4 day5 day6 day7 day8)
+set(DAYS day1 day2 day3 day4 day5 day6 day7 day8 day9)
 
 foreach(day ${DAYS})
     add_executable(${day} ${day}.c)
