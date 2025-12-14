@@ -137,5 +137,6 @@ int main() {
         printf("(part2) grand_total = %zu\n", grand_total);
     }
 
+    free_file_info(fi);
     return EXIT_SUCCESS;
 }

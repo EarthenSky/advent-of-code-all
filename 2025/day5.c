@@ -149,5 +149,6 @@ int main() {
 
     printf("(part2) total_num_fresh_ingredients = %zu\n", total_num_fresh_ingredients);
 
+    free_file_info(fi);
     return EXIT_SUCCESS;
 }

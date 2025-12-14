@@ -83,5 +83,6 @@ int main() {
         printf("(part2) num_timelines = %zu\n", num_timelines);
     }
 
+    free_file_info(fi);
     return EXIT_SUCCESS;
 }
