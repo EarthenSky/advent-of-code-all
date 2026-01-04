@@ -3,8 +3,7 @@
     "module": "commonjs",
     "noImplicitAny": true,
     "removeComments": true,
-    "preserveConstEnums": true,
-    "sourceMap": true
+    "preserveConstEnums": true
   },
   "include": [ "./*.ts" ],
   "lib": [ "es2017" ]

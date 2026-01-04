@@ -1,3 +1,4 @@
+
 function minAndIndex(list:number[]): [number, number] | null {
     if (list.length === 0)
         return null;
@@ -14,9 +15,10 @@ function minAndIndex(list:number[]): [number, number] | null {
     return [min, min_i];
 }
 
-function part1(contents: string): number | null {
+function bothParts(contents: string): number | null {
     const pairs: [number, number][] =
         contents
+        .trim()
         .split("\n")
         .map(str => str.split("   "))
         .map(str => [
@@ -24,19 +26,34 @@ function part1(contents: string): number | null {
             Number(str[1])
         ]);
   
-    const leftIndexMap = new Map();
-    const rightIndexMap = new Map();
+    const leftOccuranceMap = new Map();
+    const rightOccuranceMap = new Map();
     const left: number[] = [];
     const right: number[] = [];
-    var i: number = 0;
     for (const [l, r] of pairs) {
         left.push(l);
         right.push(r);
-        leftIndexMap.set(l, i);
-        rightIndexMap.set(r, i);
-        i += 1;
+
+        if (leftOccuranceMap.has(l)) {
+            leftOccuranceMap.set(l, leftOccuranceMap.get(l)+1);
+        } else {
+            leftOccuranceMap.set(l, 1);
+        }
+
+        if (rightOccuranceMap.has(r)) {
+            rightOccuranceMap.set(r, rightOccuranceMap.get(r)+1);
+        } else {
+            rightOccuranceMap.set(r, 1);
+        }
+
     }
-    
+ 
+    var similarityScore: number = 0;
+    for (const l of left) {
+        if (rightOccuranceMap.has(l))
+            similarityScore += l * rightOccuranceMap.get(l);
+    }    
+   
     var sumOfDifferences: number = 0;
     while (left.length !== 0) {
         const leftPair = minAndIndex(left);
@@ -47,30 +64,25 @@ function part1(contents: string): number | null {
         
         const [leftMin, leftIndex] = leftPair;
         const [rightMin, rightIndex] = rightPair;
-        const [leftVal, rightVal] = [left[leftIndex], right[rightIndex]];
-
-        console.log(leftMin);
-        console.log(rightMin);
-
-        if (leftMin != rightMin) {
-            console.log("ERROR: expected both lists to have the same elements. Found differen min()");
-            return null;
-        }
 
         const diff =
-            Math.max(leftIndexMap.get(leftVal), rightIndexMap.get(rightVal))
-            - Math.min(leftIndexMap.get(leftVal), rightIndexMap.get(rightVal));
-        console.log(diff);
+            Math.max(leftMin, rightMin)
+            - Math.min(leftMin, rightMin);
+        sumOfDifferences += diff;
 
-        // oh no, O(n)! Use a min-heap instead for O(n log n)
+        // oh no, O(n)! Use a min-heap instead for O(log n)
         left.splice(leftIndex, 1);
         right.splice(rightIndex, 1);
-
-        sumOfDifferences += diff;
     }
 
-    return sumOfDifferences;
+    console.log("(part1) sum of differences = " + sumOfDifferences);
+    console.log("(part2) similarity score = " + similarityScore);
 }
 
-const totalDifferences = part1("9999   1234\n1234   1111\n1111   9999");
-console.log(totalDifferences);
+const fs = require('node:fs');
+
+fs.readFile("./input.day1", "utf8", (err:Error, contents:string) => {
+    if (err) throw err;
+    bothParts(contents);
+});
+
